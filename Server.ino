@@ -1,8 +1,6 @@
-/*
-    Based on Neil Kolban example for IDF: https://github.com/nkolban/esp32-snippets/blob/master/cpp_utils/tests/BLE%20Tests/SampleServer.cpp Ported to Arduino ESP32 by Evandro Copercini
-    updates by chegewara
-*/
-#include <Arduino.h>
+#include <NeoPixelBus.h>
+
+
 #include <BLEDevice.h>
 #include <BLEUtils.h>
 #include <BLEServer.h>
@@ -10,11 +8,10 @@
 #include "BucaMoon.hpp"
 
 
-
 void setup()
 {
 	Serial.begin(115200);
-	Serial.println("Starting BLE work!");
+	Serial.println("Laburando...");
 
 	BLEDevice::init("CABA es mejor que AEBA");
 	BLEServer *pServer = BLEDevice::createServer();
@@ -32,12 +29,11 @@ void setup()
 	pAdvertising->setScanResponse(true);
 	pAdvertising->setMinPreferred(0x06); // functions that help with iPhone connections issue
 	pAdvertising->setMinPreferred(0x12);
-	BLEDevice::startAdvertising();
-	Serial.println("Characteristic defined! Now you can read it in your phone!");
-}
+	BLEDevice::startAdvertising();}
 
 void loop()
 {
+      #ifdef DEBUG
 	Serial.println("*********");
 	for (int i = 0; i < problem.length(); i++)
 	{
@@ -46,4 +42,5 @@ void loop()
 
 	Serial.println("\n*********");
 	delay(2000);
+      #endif
 }
