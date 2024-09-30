@@ -31,8 +31,10 @@ void setup()
 	pAdvertising->setMinPreferred(0x12);
 	BLEDevice::startAdvertising();
 
+      initAnimation();
       // Show empty board
-      showBoard();
+      showBoard(NULL);
+      Serial.println("Listo!");
 }
 
 void loop()

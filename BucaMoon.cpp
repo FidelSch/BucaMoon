@@ -3,6 +3,7 @@
 #include <NeoPixelBus.h>
 
 static bool use_additional_led = false;
+static String problemString = "";
 
 #ifdef DEBUG
 uint8_t ledPrintMapping[HOLD_AMOUNT] = {17, 18, 53, 54, 89, 90, 125, 126, 161, 162, 197,
@@ -25,11 +26,43 @@ uint8_t ledPrintMapping[HOLD_AMOUNT] = {17, 18, 53, 54, 89, 90, 125, 126, 161, 1
                                         0, 35, 36, 71, 72, 107, 108, 143, 144, 179, 180};
 #endif
 
+// A chequear
+int8_t additionalledmapping[] = {0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0};
+
+typedef enum {
+      START_HOLD = 'S',
+      PROGRESS_HOLD = 'P',
+      END_HOLD = 'E',
+      RIGHT_HOLD = 'R',
+      LEFT_HOLD = 'L',
+      MATCH_HOLD = 'M',
+      FOOT_HOLD = 'F'
+} HoldType;
+
 void clearProblem(uint8_t h[HOLD_AMOUNT])
 {
       for (int i = 0; i < HOLD_AMOUNT; i++)
       {
             h[i] = 0;
+      }
+}
+
+void initAnimation(){
+      NeoPixelBus<NeoRgbFeature, NeoWs2811Method> strip(HOLD_AMOUNT, PIN);
+      strip.Begin();
+      strip.Show();
+
+      // Red, green, blue, off
+      std::vector<RgbColor> colors = {RgbColor(255, 0, 0), RgbColor(0, 255, 0), RgbColor(0, 0, 255), RgbColor(0, 0, 0)};
+
+      for (auto colo : colors)
+      {
+            for (size_t i = 0; i < HOLD_AMOUNT; i++)
+            {
+                  strip.SetPixelColor(i, colo);
+                  strip.Show();
+                  delay(2);
+            }
       }
 }
 
@@ -94,15 +127,19 @@ void showBoard(uint8_t holds[HOLD_AMOUNT])
       {
             switch (holds[i])
             {
-            case 'S':
+            case START_HOLD:
+                  if (use_additional_led) strip.SetPixelColor(i + additionalledmapping[i], RgbColor(0, 255, 0));
                   strip.SetPixelColor(i, RgbColor(0, 255, 0));
                   break;
-            case 'R':
-            case 'L':
-            case 'M':
+            case RIGHT_HOLD:
+            case LEFT_HOLD:
+            case MATCH_HOLD:
+            case PROGRESS_HOLD:
+            case FOOT_HOLD:
+                  if (use_additional_led) strip.SetPixelColor(i + additionalledmapping[i], RgbColor(0, 0, 255));
                   strip.SetPixelColor(i, RgbColor(0, 0, 255));
                   break;
-            case 'E':
+            case END_HOLD:
                   strip.SetPixelColor(i, RgbColor(255, 0, 0));
                   break;
             }
@@ -114,7 +151,6 @@ void showBoard(uint8_t holds[HOLD_AMOUNT])
 void MoonCallback::onWrite(BLECharacteristic *pCharacteristic)
 {
       uint8_t holds[HOLD_AMOUNT] = "";
-      String problemString = "";
       String value = pCharacteristic->getValue();
       size_t i = 0;
 
@@ -139,14 +175,18 @@ void MoonCallback::onWrite(BLECharacteristic *pCharacteristic)
             }
 
             // Go to start of problem string
-            while (i < value.length() && value[i++] != 'l');
+            i = 3;
+      }
+      else
+      {
+            use_additional_led = false;
       }
 
-      if (value.length() > 1 && value[i] == 'l' && value[i + 1] == '#') // New problem
+      if (i < value.length() && value.length() > 1 && value[i] == 'l' && value[i + 1] == '#') // New problem
       {
             problemString = "";
             clearProblem(holds);
-            showBoard();
+            showBoard(NULL);
             i+=2;
       }
       while (i < value.length())
@@ -157,6 +197,7 @@ void MoonCallback::onWrite(BLECharacteristic *pCharacteristic)
                   showBoard(holds);
 #ifdef DEBUG
                   printBoardState(holds);
+                  Serial.println(problemString);
 #endif
                   return;
             }

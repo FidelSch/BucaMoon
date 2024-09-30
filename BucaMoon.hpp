@@ -12,10 +12,11 @@
 // extern bool use_additional_led;
 
 
+void initAnimation();
 void clearProblem(uint8_t h[HOLD_AMOUNT]);
 void printBoardState(uint8_t holds[HOLD_AMOUNT]);
 void parseProblemString(String problemString, uint8_t newHolds[HOLD_AMOUNT]);
-void showBoard(uint8_t holds[HOLD_AMOUNT] = nullptr);
+void showBoard(uint8_t holds[HOLD_AMOUNT]);
 
 class MoonCallback : public BLECharacteristicCallbacks{
 public:

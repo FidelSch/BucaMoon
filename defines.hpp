@@ -7,9 +7,6 @@
 #define HOLD_AMOUNT  198
 #define PIN 16
 
-#define START_HOLD 1
-#define COMMON_HOLD 2
-#define FINNISH_HOLD 3
 
 #define DEBUG
 
