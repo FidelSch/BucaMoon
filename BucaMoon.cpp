@@ -42,7 +42,7 @@ typedef enum {
 } HoldType;
 
 
-void initAnimation(){
+void initAnimation(void *_null){
       NeoPixelBus<NeoRgbFeature, NeoWs2811Method> strip(HOLD_AMOUNT, PIN);
       strip.Begin();
       strip.Show();
@@ -59,6 +59,9 @@ void initAnimation(){
                   delay(2);
             }
       }
+
+      // This function should not return
+      for(;;) delay(1);
 }
 
 #ifdef DEBUG

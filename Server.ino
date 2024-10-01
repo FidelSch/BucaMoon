@@ -7,13 +7,23 @@
 #include "defines.hpp"
 #include "BucaMoon.hpp"
 
+TaskHandle_t Animation;
 
 void setup()
 {
 	Serial.begin(115200);
 	Serial.println("Laburando...");
 
-	BLEDevice::init("CABA es mejor que AEBA");
+      xTaskCreatePinnedToCore(
+          initAnimation,
+          "initAnimation",
+          4096,
+          NULL,
+          1,
+          &Animation,
+          0);
+
+      BLEDevice::init("Fran se la come");
 	BLEServer *pServer = BLEDevice::createServer();
 	BLEService *pService = pServer->createService(SERVICE_UUID);
 	BLECharacteristic *pCharacteristicRX = pService->createCharacteristic(CHARACTERISTIC_UUID_RX, BLECharacteristic::PROPERTY_WRITE);
@@ -31,9 +41,6 @@ void setup()
 	pAdvertising->setMinPreferred(0x12);
 	BLEDevice::startAdvertising();
 
-      initAnimation();
-      // Show empty board
-      showBoard(std::array<uint8_t, HOLD_AMOUNT>());
       Serial.println("Listo!");
 }
 
