@@ -13,10 +13,9 @@
 
 
 void initAnimation();
-void clearProblem(uint8_t h[HOLD_AMOUNT]);
-void printBoardState(uint8_t holds[HOLD_AMOUNT]);
-void parseProblemString(String problemString, uint8_t newHolds[HOLD_AMOUNT]);
-void showBoard(uint8_t holds[HOLD_AMOUNT]);
+void printBoardState(std::array<uint8_t, HOLD_AMOUNT> &holds);
+void parseProblemString(String problemString, std::array<uint8_t, HOLD_AMOUNT> &newHolds);
+void showBoard(const std::array<uint8_t, HOLD_AMOUNT> holds);
 
 class MoonCallback : public BLECharacteristicCallbacks{
 public:

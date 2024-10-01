@@ -3,6 +3,7 @@
 #include <NeoPixelBus.h>
 
 static bool use_additional_led = false;
+static std::array<uint8_t, HOLD_AMOUNT> holds;
 static String problemString = "";
 
 #ifdef DEBUG
@@ -36,16 +37,10 @@ typedef enum {
       RIGHT_HOLD = 'R',
       LEFT_HOLD = 'L',
       MATCH_HOLD = 'M',
-      FOOT_HOLD = 'F'
+      FOOT_HOLD = 'F',
+      NO_HOLD = (char)0
 } HoldType;
 
-void clearProblem(uint8_t h[HOLD_AMOUNT])
-{
-      for (int i = 0; i < HOLD_AMOUNT; i++)
-      {
-            h[i] = 0;
-      }
-}
 
 void initAnimation(){
       NeoPixelBus<NeoRgbFeature, NeoWs2811Method> strip(HOLD_AMOUNT, PIN);
@@ -67,7 +62,7 @@ void initAnimation(){
 }
 
 #ifdef DEBUG
-void printBoardState(uint8_t holds[HOLD_AMOUNT])
+void printBoardState(std::array<uint8_t, HOLD_AMOUNT> &holds)
 {
       // 18 rows, 11 columns 
       Serial.print("   [A][B][C][D][E][F][G][H][I][J][K]");
@@ -84,7 +79,7 @@ void printBoardState(uint8_t holds[HOLD_AMOUNT])
             }
 
             // Print holds
-            if (holds[ledPrintMapping[j]])
+            if (holds[ledPrintMapping[j]] != NO_HOLD)
                   Serial.print("[" + String((char)(holds[ledPrintMapping[j]])) + "]");
             else
                   Serial.print("[ ]");
@@ -93,15 +88,23 @@ void printBoardState(uint8_t holds[HOLD_AMOUNT])
 }
 #endif
 
-void parseProblemString(String problemString, uint8_t newHolds[HOLD_AMOUNT])
+void parseProblemString(String problemString, std::array<uint8_t, HOLD_AMOUNT> &newHolds)
 {
       String holdDescription = "";
+      size_t holdIndex;
 
       for (int i = 0; i < problemString.length(); i++)
       {
             if (problemString[i] == ',')
             {
-                  newHolds[holdDescription.substring(1).toInt()] = holdDescription[0];
+                  holdIndex = holdDescription.substring(1).toInt();
+                  if (holdIndex >= HOLD_AMOUNT)
+                  {
+                        Serial.println("ERROR: Hold Index out of range"); // Buffer overflow protection
+                        return;
+                  }
+
+                  newHolds[holdIndex] = holdDescription[0];
                   holdDescription = "";
             }
             else
@@ -109,18 +112,22 @@ void parseProblemString(String problemString, uint8_t newHolds[HOLD_AMOUNT])
                   holdDescription += problemString[i];
             }
       }
-      newHolds[holdDescription.substring(1).toInt()] = holdDescription[0];
-      holdDescription = "";
+      holdIndex = holdDescription.substring(1).toInt();
+      if (holdIndex >= HOLD_AMOUNT)
+      {
+            Serial.println("ERROR: Hold Index out of range"); // Buffer overflow protection
+            return;
+      }
+
+      newHolds[holdIndex] = holdDescription[0];
 }
 
-void showBoard(uint8_t holds[HOLD_AMOUNT])
+void showBoard(const std::array<uint8_t, HOLD_AMOUNT> holds)
 {
+      RgbColor color;
       NeoPixelBus<NeoRgbFeature, NeoWs2811Method> strip(HOLD_AMOUNT, PIN);
       strip.Begin();
       strip.Show();
-
-      if (!holds)
-            return;
 
 // TODO: additionalLEDMapping
       for (size_t i = 0; i < HOLD_AMOUNT; i++)
@@ -128,19 +135,31 @@ void showBoard(uint8_t holds[HOLD_AMOUNT])
             switch (holds[i])
             {
             case START_HOLD:
-                  if (use_additional_led) strip.SetPixelColor(i + additionalledmapping[i], RgbColor(0, 255, 0));
-                  strip.SetPixelColor(i, RgbColor(0, 255, 0));
+                  color = RgbColor(0, 255, 0);
+                  if (use_additional_led){
+                        // strip.SetPixelColor(i + additionalledmapping[i], color);
+                  }
+                  strip.SetPixelColor(i, color);
                   break;
             case RIGHT_HOLD:
             case LEFT_HOLD:
             case MATCH_HOLD:
             case PROGRESS_HOLD:
             case FOOT_HOLD:
-                  if (use_additional_led) strip.SetPixelColor(i + additionalledmapping[i], RgbColor(0, 0, 255));
-                  strip.SetPixelColor(i, RgbColor(0, 0, 255));
+                  color = RgbColor(0, 0, 255);
+                  if (use_additional_led){
+                        // strip.SetPixelColor(i + additionalledmapping[i], color);
+                  }
+                  strip.SetPixelColor(i, color);
                   break;
             case END_HOLD:
-                  strip.SetPixelColor(i, RgbColor(255, 0, 0));
+                  color = RgbColor(255, 0, 0);
+                  strip.SetPixelColor(i, color);
+                  break;
+            case NO_HOLD:
+            default:
+                  color = RgbColor(0);
+                  strip.SetPixelColor(i, color);
                   break;
             }
       }
@@ -150,7 +169,6 @@ void showBoard(uint8_t holds[HOLD_AMOUNT])
 
 void MoonCallback::onWrite(BLECharacteristic *pCharacteristic)
 {
-      uint8_t holds[HOLD_AMOUNT] = "";
       String value = pCharacteristic->getValue();
       size_t i = 0;
 
@@ -185,8 +203,8 @@ void MoonCallback::onWrite(BLECharacteristic *pCharacteristic)
       if (i < value.length() && value.length() > 1 && value[i] == 'l' && value[i + 1] == '#') // New problem
       {
             problemString = "";
-            clearProblem(holds);
-            showBoard(NULL);
+            holds.fill(NO_HOLD);
+            showBoard(holds);
             i+=2;
       }
       while (i < value.length())
@@ -198,6 +216,8 @@ void MoonCallback::onWrite(BLECharacteristic *pCharacteristic)
 #ifdef DEBUG
                   printBoardState(holds);
                   Serial.println(problemString);
+                  Serial.print("holds: ");
+                  for (byte c: holds) Serial.print(c + " ");
 #endif
                   return;
             }

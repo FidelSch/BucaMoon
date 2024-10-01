@@ -33,7 +33,7 @@ void setup()
 
       initAnimation();
       // Show empty board
-      showBoard(NULL);
+      showBoard(std::array<uint8_t, HOLD_AMOUNT>());
       Serial.println("Listo!");
 }
 
