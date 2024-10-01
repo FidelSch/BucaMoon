@@ -65,7 +65,7 @@ void initAnimation(void *_null){
 }
 
 #ifdef DEBUG
-void printBoardState(std::array<uint8_t, HOLD_AMOUNT> &holds)
+void printBoardState(const std::array<uint8_t, HOLD_AMOUNT> &holds)
 {
       // 18 rows, 11 columns 
       Serial.print("   [A][B][C][D][E][F][G][H][I][J][K]");
@@ -91,7 +91,7 @@ void printBoardState(std::array<uint8_t, HOLD_AMOUNT> &holds)
 }
 #endif
 
-void parseProblemString(String problemString, std::array<uint8_t, HOLD_AMOUNT> &newHolds)
+void parseProblemString(const String &problemString, std::array<uint8_t, HOLD_AMOUNT> &outHolds)
 {
       String holdDescription = "";
       size_t holdIndex;
@@ -107,7 +107,7 @@ void parseProblemString(String problemString, std::array<uint8_t, HOLD_AMOUNT> &
                         return;
                   }
 
-                  newHolds[holdIndex] = holdDescription[0];
+                  outHolds[holdIndex] = holdDescription[0];
                   holdDescription = "";
             }
             else
@@ -115,6 +115,7 @@ void parseProblemString(String problemString, std::array<uint8_t, HOLD_AMOUNT> &
                   holdDescription += problemString[i];
             }
       }
+
       holdIndex = holdDescription.substring(1).toInt();
       if (holdIndex >= HOLD_AMOUNT)
       {
@@ -122,7 +123,7 @@ void parseProblemString(String problemString, std::array<uint8_t, HOLD_AMOUNT> &
             return;
       }
 
-      newHolds[holdIndex] = holdDescription[0];
+      outHolds[holdIndex] = holdDescription[0];
 }
 
 void showBoard(const std::array<uint8_t, HOLD_AMOUNT> holds)
