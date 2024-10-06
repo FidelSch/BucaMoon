@@ -9,10 +9,16 @@
 
 TaskHandle_t Animation;
 
+BLEServer *pServer;
+
 void setup()
 {
+#ifdef DEBUG
 	Serial.begin(115200);
 	Serial.println("Laburando...");
+#endif
+
+      gpio_set_direction((gpio_num_t)PIN, GPIO_MODE_OUTPUT);
 
       xTaskCreatePinnedToCore(
           initAnimation,
@@ -24,7 +30,7 @@ void setup()
           0);
 
       BLEDevice::init("Fran se la come");
-	BLEServer *pServer = BLEDevice::createServer();
+	pServer = BLEDevice::createServer();
 	BLEService *pService = pServer->createService(SERVICE_UUID);
 	BLECharacteristic *pCharacteristicRX = pService->createCharacteristic(CHARACTERISTIC_UUID_RX, BLECharacteristic::PROPERTY_WRITE);
 	BLECharacteristic *pCharacteristicTX = pService->createCharacteristic(CHARACTERISTIC_UUID_TX, BLECharacteristic::PROPERTY_READ);
@@ -41,13 +47,19 @@ void setup()
 	pAdvertising->setMinPreferred(0x12);
 	BLEDevice::startAdvertising();
 
+#ifdef DEBUG
       Serial.println("Listo!");
+#endif
 }
 
 void loop()
 {
+      if (pServer->getConnectedCount() < 4){
+            BLEDevice::startAdvertising();
+      }
+
       #ifdef DEBUG
-	Serial.println("*");
-	delay(2000);
+	Serial.println("Conectados: " + String(pServer->getConnectedCount()));
+	vTaskDelay(2000 / portTICK_PERIOD_MS);
       #endif
 }

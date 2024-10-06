@@ -56,12 +56,12 @@ void initAnimation(void *_null){
             {
                   strip.SetPixelColor(i, colo);
                   strip.Show();
-                  delay(2);
+                  vTaskDelay(2);
             }
       }
 
       // This function should not return
-      for(;;) delay(1);
+      for(;;) vTaskDelay(5000);
 }
 
 #ifdef DEBUG

@@ -1,7 +1,7 @@
 #pragma once
 
 #include "defines.hpp"
-#include <BLEDevice.h>
+#include <BLECharacteristic.h>
 
 
 /// @brief Show init animation
