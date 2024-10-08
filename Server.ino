@@ -1,6 +1,5 @@
 #include <NeoPixelBus.h>
 
-
 #include <BLEDevice.h>
 #include <BLEUtils.h>
 #include <BLEServer.h>
@@ -9,7 +8,7 @@
 
 TaskHandle_t Animation;
 
-BLEServer *pServer;
+static BLEServer *Server;
 
 void setup()
 {
@@ -18,7 +17,7 @@ void setup()
 	Serial.println("Laburando...");
 #endif
 
-      gpio_set_direction((gpio_num_t)PIN, GPIO_MODE_OUTPUT);
+      gpio_set_direction((gpio_num_t)OUTPUT_PIN, GPIO_MODE_OUTPUT);
 
       xTaskCreatePinnedToCore(
           initAnimation,
@@ -30,23 +29,21 @@ void setup()
           0);
 
       BLEDevice::init("Fran se la come");
-	pServer = BLEDevice::createServer();
-	BLEService *pService = pServer->createService(SERVICE_UUID);
-	BLECharacteristic *pCharacteristicRX = pService->createCharacteristic(CHARACTERISTIC_UUID_RX, BLECharacteristic::PROPERTY_WRITE);
-	BLECharacteristic *pCharacteristicTX = pService->createCharacteristic(CHARACTERISTIC_UUID_TX, BLECharacteristic::PROPERTY_READ);
+	Server = BLEDevice::createServer();
+	BLEService *Service = Server->createService(SERVICE_UUID);
+	BLECharacteristic *RXCharacteristic = Service->createCharacteristic(CHARACTERISTIC_UUID_RX, BLECharacteristic::PROPERTY_WRITE);
+	BLECharacteristic *TXCharacteristic = Service->createCharacteristic(CHARACTERISTIC_UUID_TX, BLECharacteristic::PROPERTY_READ);
 
-	pCharacteristicRX->setCallbacks(new MoonCallback());
+	RXCharacteristic->setCallbacks(new MoonCallback());
+	TXCharacteristic->setValue("Si podes leer esto a Rena le gustan las 2009");
 
-	pCharacteristicTX->setValue("Si podes leer esto a Rena le gustan las 2009");
-	pService->start();
-	// BLEAdvertising *pAdvertising = pServer->getAdvertising();  // this still is working for backward compatibility
+	Service->start();
+
 	BLEAdvertising *pAdvertising = BLEDevice::getAdvertising();
 	pAdvertising->addServiceUUID(SERVICE_UUID);
 	pAdvertising->setScanResponse(true);
 	pAdvertising->setMinPreferred(0x06); // functions that help with iPhone connections issue
 	pAdvertising->setMinPreferred(0x12);
-	BLEDevice::startAdvertising();
-
 #ifdef DEBUG
       Serial.println("Listo!");
 #endif
@@ -54,12 +51,11 @@ void setup()
 
 void loop()
 {
-      if (pServer->getConnectedCount() < 4){
+      if (Server->getConnectedCount() < 3)
             BLEDevice::startAdvertising();
-      }
 
-      #ifdef DEBUG
-	Serial.println("Conectados: " + String(pServer->getConnectedCount()));
-	vTaskDelay(2000 / portTICK_PERIOD_MS);
-      #endif
+#ifdef DEBUG
+      Serial.println("Conectados: " + String(Server->getConnectedCount()));
+      vTaskDelay(2000 / portTICK_PERIOD_MS);
+#endif
 }

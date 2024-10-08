@@ -43,7 +43,7 @@ typedef enum {
 
 
 void initAnimation(void *_null){
-      NeoPixelBus<NeoRgbFeature, NeoWs2811Method> strip(HOLD_AMOUNT, PIN);
+      NeoPixelBus<NeoRgbFeature, NeoWs2811Method> strip(HOLD_AMOUNT, OUTPUT_PIN);
       strip.Begin();
       strip.Show();
 
@@ -129,7 +129,7 @@ void parseProblemString(const String &problemString, std::array<uint8_t, HOLD_AM
 void showBoard(const std::array<uint8_t, HOLD_AMOUNT> holds)
 {
       RgbColor color;
-      NeoPixelBus<NeoRgbFeature, NeoWs2811Method> strip(HOLD_AMOUNT, PIN);
+      NeoPixelBus<NeoRgbFeature, NeoWs2811Method> strip(HOLD_AMOUNT, OUTPUT_PIN);
       strip.Begin();
       strip.Show();
 
