@@ -7,5 +7,9 @@
 #define HOLD_AMOUNT  198
 #define OUTPUT_PIN   16
 
+// Status codes
+#define PARSE_OK 0
+#define PARSE_ERROR_OUT_OF_BOUNDS 1
+
 
 #define DEBUG

@@ -7,7 +7,7 @@ static std::array<uint8_t, HOLD_AMOUNT> holds;
 static String problemString = "";
 
 #ifdef DEBUG
-uint8_t ledPrintMapping[HOLD_AMOUNT] = {17, 18, 53, 54, 89, 90, 125, 126, 161, 162, 197,
+static const uint8_t ledPrintMapping[HOLD_AMOUNT] = {17, 18, 53, 54, 89, 90, 125, 126, 161, 162, 197,
                                         16, 19, 52, 55, 88, 91, 124, 127, 160, 163, 196,
                                         15, 20, 51, 56, 87, 92, 123, 128, 159, 164, 195,
                                         14, 21, 50, 57, 86, 93, 122, 129, 158, 165, 194,
@@ -28,7 +28,7 @@ uint8_t ledPrintMapping[HOLD_AMOUNT] = {17, 18, 53, 54, 89, 90, 125, 126, 161, 1
 #endif
 
 // A chequear
-int8_t additionalledmapping[] = {0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0};
+static const int8_t additionalledmapping[] = {0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0};
 
 typedef enum {
       START_HOLD = 'S',
@@ -95,35 +95,38 @@ void parseProblemString(const String &problemString, std::array<uint8_t, HOLD_AM
 {
       String holdDescription = "";
       size_t holdIndex;
+      char holdType;
 
-      for (int i = 0; i < problemString.length(); i++)
+      // Helper function
+      auto parseHold = [](const String &description, size_t *outIndex, char *outHold)
       {
-            if (problemString[i] == ',')
-            {
-                  holdIndex = holdDescription.substring(1).toInt();
-                  if (holdIndex >= HOLD_AMOUNT)
-                  {
-                        Serial.println("ERROR: Hold Index out of range"); // Buffer overflow protection
-                        return;
-                  }
+            *outIndex = description.substring(1).toInt();
+            *outHold = description[0];
 
-                  outHolds[holdIndex] = holdDescription[0];
-                  holdDescription = "";
+            if (*outIndex >= HOLD_AMOUNT)
+            {
+                  Serial.println("ERROR: Hold Index out of range"); // Buffer overflow protection
+                  return PARSE_ERROR_OUT_OF_BOUNDS;
+            }
+            return PARSE_OK;
+      };
+
+      // Parse each hold
+      for (size_t i = 0; i <= problemString.length(); i++)
+      {
+            if (i == problemString.length() || problemString[i] == ',')
+            {
+                  if (parseHold(holdDescription, &holdIndex, &holdType) != PARSE_OK)
+                        return;
+
+                  outHolds[holdIndex] = holdType;
+                  holdDescription.clear();
             }
             else
             {
-                  holdDescription += problemString[i];
+                  holdDescription.concat(problemString[i]);
             }
       }
-
-      holdIndex = holdDescription.substring(1).toInt();
-      if (holdIndex >= HOLD_AMOUNT)
-      {
-            Serial.println("ERROR: Hold Index out of range"); // Buffer overflow protection
-            return;
-      }
-
-      outHolds[holdIndex] = holdDescription[0];
 }
 
 void showBoard(const std::array<uint8_t, HOLD_AMOUNT> holds)
@@ -188,7 +191,7 @@ void MoonCallback::onWrite(BLECharacteristic *pCharacteristic)
             switch (value[1])
             {
             case 'Z': // "Disconnect all clients"
-                  ESP.restart();
+                  // ESP.restart();
                   break;
 
             case 'D': // "Use additional LED"
