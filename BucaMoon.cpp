@@ -28,9 +28,20 @@ static const uint8_t ledPrintMapping[HOLD_AMOUNT] = {17, 18, 53, 54, 89, 90, 125
 #endif
 
 // A chequear
-static const int8_t additionalledmapping[] = {0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0};
+static const std::array<int8_t, HOLD_AMOUNT> _additionalledmapping = {1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  0, //1
+                                                                      0, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, //2
+                                                                      1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  0, //3
+                                                                      0, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, //4
+                                                                      1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  0, //5
+                                                                      0, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, //6
+                                                                      1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  0, //7
+                                                                      0, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, //8
+                                                                      1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  0, //9
+                                                                      0, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, //10
+                                                                      1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  0 //11
+                                                                      };
 
-typedef enum {
+enum {
       START_HOLD = 'S',
       PROGRESS_HOLD = 'P',
       END_HOLD = 'E',
@@ -38,8 +49,9 @@ typedef enum {
       LEFT_HOLD = 'L',
       MATCH_HOLD = 'M',
       FOOT_HOLD = 'F',
+      ADDITIONAL_LED = 'A',
       NO_HOLD = (char)0
-} HoldType;
+};
 
 
 void initAnimation(void *_null){
@@ -48,7 +60,7 @@ void initAnimation(void *_null){
       strip.Show();
 
       // Red, green, blue, off
-      std::vector<RgbColor> colors = {RgbColor(255, 0, 0), RgbColor(0, 255, 0), RgbColor(0, 0, 255), RgbColor(0, 0, 0)};
+      std::array<RgbColor, 4> colors = {RgbColor(255, 0, 0), RgbColor(0, 255, 0), RgbColor(0, 0, 255), RgbColor(0, 0, 0)};
 
       for (auto colo : colors)
       {
@@ -129,6 +141,18 @@ void parseProblemString(const String &problemString, std::array<uint8_t, HOLD_AM
       }
 }
 
+void setAdditionalLeds(std::array<uint8_t, HOLD_AMOUNT>& holds)
+{
+      auto additionalLedMapping = [](size_t i)
+      {
+            return (i >= 0 && i < _additionalledmapping.size()) ? i + _additionalledmapping[i] : 0;
+      };
+      for (size_t i = 0; i < holds.size(); i++)
+      {
+            holds[additionalLedMapping(i)] = ADDITIONAL_LED;
+      }
+}
+
 void showBoard(const std::array<uint8_t, HOLD_AMOUNT> holds)
 {
       RgbColor color;
@@ -136,16 +160,12 @@ void showBoard(const std::array<uint8_t, HOLD_AMOUNT> holds)
       strip.Begin();
       strip.Show();
 
-// TODO: additionalLEDMapping
       for (size_t i = 0; i < HOLD_AMOUNT; i++)
       {
             switch (holds[i])
             {
             case START_HOLD:
                   color = RgbColor(0, 255, 0);
-                  if (use_additional_led){
-                        // strip.SetPixelColor(i + additionalledmapping[i], color);
-                  }
                   strip.SetPixelColor(i, color);
                   break;
             case RIGHT_HOLD:
@@ -153,10 +173,8 @@ void showBoard(const std::array<uint8_t, HOLD_AMOUNT> holds)
             case MATCH_HOLD:
             case PROGRESS_HOLD:
             case FOOT_HOLD:
+            case ADDITIONAL_LED:
                   color = RgbColor(0, 0, 255);
-                  if (use_additional_led){
-                        // strip.SetPixelColor(i + additionalledmapping[i], color);
-                  }
                   strip.SetPixelColor(i, color);
                   break;
             case END_HOLD:
@@ -219,7 +237,10 @@ void MoonCallback::onWrite(BLECharacteristic *pCharacteristic)
             if (value[i] == '#') // Problem end
             {
                   parseProblemString(problemString, holds);
+                  if (use_additional_led)
+                        setAdditionalLeds(holds);
                   showBoard(holds);
+                  use_additional_led = false;
 #ifdef DEBUG
                   printBoardState(holds);
                   Serial.println(problemString);
