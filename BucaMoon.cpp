@@ -28,17 +28,18 @@ static const uint8_t ledPrintMapping[HOLD_AMOUNT] = {17, 18, 53, 54, 89, 90, 125
 #endif
 
 // A chequear
-static const std::array<int8_t, HOLD_AMOUNT> _additionalledmapping = {1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  0, //1
-                                                                      0, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, //2
-                                                                      1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  0, //3
-                                                                      0, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, //4
-                                                                      1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  0, //5
-                                                                      0, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, //6
-                                                                      1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  0, //7
-                                                                      0, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, //8
-                                                                      1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  0, //9
-                                                                      0, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, //10
-                                                                      1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  0 //11
+constexpr int8_t NO_MAPPING = INT8_MAX;
+static const std::array<int8_t, HOLD_AMOUNT> _additionalledmapping = {1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  NO_MAPPING, //1
+                                                                      NO_MAPPING, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, //2
+                                                                      1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  NO_MAPPING, //3
+                                                                      NO_MAPPING, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, //4
+                                                                      1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  NO_MAPPING, //5
+                                                                      NO_MAPPING, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, //6
+                                                                      1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  NO_MAPPING, //7
+                                                                      NO_MAPPING, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, //8
+                                                                      1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  NO_MAPPING, //9
+                                                                      NO_MAPPING, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, //10
+                                                                      1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  NO_MAPPING //11
                                                                       };
 
 enum {
@@ -143,13 +144,14 @@ void parseProblemString(const String &problemString, std::array<uint8_t, HOLD_AM
 
 void setAdditionalLeds(std::array<uint8_t, HOLD_AMOUNT>& holds)
 {
-      auto additionalLedMapping = [](size_t i)
+      constexpr auto additionalLedMapping = [](size_t i)
       {
-            return (i >= 0 && i < _additionalledmapping.size()) ? i + _additionalledmapping[i] : 0;
+            return (i >= 0 && i < _additionalledmapping.size()) ? i + _additionalledmapping[i] : NO_MAPPING;
       };
       for (size_t i = 0; i < holds.size(); i++)
       {
-            holds[additionalLedMapping(i)] = ADDITIONAL_LED;
+            if (holds[i] != ADDITIONAL_LED && holds[i] != NO_HOLD && additionalLedMapping(i) != NO_MAPPING)
+                  holds[additionalLedMapping(i)] = ADDITIONAL_LED;
       }
 }
 
@@ -220,10 +222,6 @@ void MoonCallback::onWrite(BLECharacteristic *pCharacteristic)
             // Go to start of problem string
             i = 3;
       }
-      else
-      {
-            use_additional_led = false;
-      }
 
       if (i < value.length() && value.length() > 1 && value[i] == 'l' && value[i + 1] == '#') // New problem
       {
@@ -245,7 +243,8 @@ void MoonCallback::onWrite(BLECharacteristic *pCharacteristic)
                   printBoardState(holds);
                   Serial.println(problemString);
                   Serial.print("holds: ");
-                  for (byte c: holds) Serial.print(c + " ");
+                  for (char c: holds) Serial.print(String((c)?c:'+'));
+                  Serial.println();
 #endif
                   return;
             }
