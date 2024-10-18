@@ -144,14 +144,20 @@ void parseProblemString(const String &problemString, std::array<uint8_t, HOLD_AM
 
 void setAdditionalLeds(std::array<uint8_t, HOLD_AMOUNT>& holds)
 {
+      uint8_t mapping;
+
       constexpr auto additionalLedMapping = [](size_t i)
       {
             return (i >= 0 && i < _additionalledmapping.size()) ? i + _additionalledmapping[i] : NO_MAPPING;
       };
       for (size_t i = 0; i < holds.size(); i++)
       {
-            if (holds[i] != ADDITIONAL_LED && holds[i] != NO_HOLD && additionalLedMapping(i) != NO_MAPPING)
-                  holds[additionalLedMapping(i)] = ADDITIONAL_LED;
+            mapping = additionalLedMapping(i);
+            if (holds[mapping] != NO_HOLD || mapping == NO_MAPPING)
+                  continue;
+
+            if (holds[i] != ADDITIONAL_LED && holds[i] != NO_HOLD)
+                  holds[mapping] = ADDITIONAL_LED;
       }
 }
 
