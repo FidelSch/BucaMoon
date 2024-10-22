@@ -2,7 +2,10 @@
 
 #include "defines.hpp"
 #include <BLECharacteristic.h>
+#include <Arduino.h>
+#include <FastLED.h>
 
+extern CRGB LedBuffer[HOLD_AMOUNT];
 
 /// @brief Show init animation
 void initAnimation(void *_null = nullptr);

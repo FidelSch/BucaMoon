@@ -1,10 +1,13 @@
 #include "defines.hpp"
 #include "BucaMoon.hpp"
-#include <NeoPixelBus.h>
+#include <FastLED.h>
+#include <Arduino.h>
 
 static bool use_additional_led = false;
 static std::array<uint8_t, HOLD_AMOUNT> holds;
 static String problemString = "";
+CRGB LedBuffer[HOLD_AMOUNT];
+
 
 #ifdef DEBUG
 static const uint8_t ledPrintMapping[HOLD_AMOUNT] = {17, 18, 53, 54, 89, 90, 125, 126, 161, 162, 197,
@@ -54,23 +57,19 @@ enum {
       NO_HOLD = (char)0
 };
 
-
 void initAnimation(void *_null){
-      NeoPixelBus<NeoRgbFeature, NeoWs2811Method> strip(HOLD_AMOUNT, OUTPUT_PIN);
-      strip.Begin();
-      strip.Show();
 
       // Red, green, blue, off
-      std::array<RgbColor, 4> colors = {RgbColor(255, 0, 0), RgbColor(0, 255, 0), RgbColor(0, 0, 255), RgbColor(0, 0, 0)};
+      std::array<CRGB, 4> colors = {CRGB::Red, CRGB::Green, CRGB::Blue, CRGB::Black};
 
       for (auto colo : colors)
       {
             for (size_t i = 0; i < HOLD_AMOUNT; i++)
             {
-                  strip.SetPixelColor(i, colo);
-                  strip.Show();
-                  vTaskDelay(2);
+                  LedBuffer[i] = colo;
+                  FastLED.show();
             }
+            vTaskDelay(2);
       }
 
       // This function should not return
@@ -146,7 +145,7 @@ void setAdditionalLeds(std::array<uint8_t, HOLD_AMOUNT>& holds)
 {
       uint8_t mapping;
 
-      constexpr auto additionalLedMapping = [](size_t i)
+      auto additionalLedMapping = [](size_t i)
       {
             return (i >= 0 && i < _additionalledmapping.size()) ? i + _additionalledmapping[i] : NO_MAPPING;
       };
@@ -163,18 +162,13 @@ void setAdditionalLeds(std::array<uint8_t, HOLD_AMOUNT>& holds)
 
 void showBoard(const std::array<uint8_t, HOLD_AMOUNT> holds)
 {
-      RgbColor color;
-      NeoPixelBus<NeoRgbFeature, NeoWs2811Method> strip(HOLD_AMOUNT, OUTPUT_PIN);
-      strip.Begin();
-      strip.Show();
 
       for (size_t i = 0; i < HOLD_AMOUNT; i++)
       {
             switch (holds[i])
             {
             case START_HOLD:
-                  color = RgbColor(0, 255, 0);
-                  strip.SetPixelColor(i, color);
+                  LedBuffer[i] = CRGB::Green;
                   break;
             case RIGHT_HOLD:
             case LEFT_HOLD:
@@ -182,31 +176,28 @@ void showBoard(const std::array<uint8_t, HOLD_AMOUNT> holds)
             case PROGRESS_HOLD:
             case FOOT_HOLD:
             case ADDITIONAL_LED:
-                  color = RgbColor(0, 0, 255);
-                  strip.SetPixelColor(i, color);
+                  LedBuffer[i] = CRGB::Blue;
                   break;
             case END_HOLD:
-                  color = RgbColor(255, 0, 0);
-                  strip.SetPixelColor(i, color);
+                  LedBuffer[i] = CRGB::Red;
                   break;
             case NO_HOLD:
             default:
-                  color = RgbColor(0);
-                  strip.SetPixelColor(i, color);
+                  LedBuffer[i] = CRGB::Black;
                   break;
             }
       }
 
-      strip.Show();
+      FastLED.show();
 }
 
 void MoonCallback::onWrite(BLECharacteristic *pCharacteristic)
 {
-      String value = pCharacteristic->getValue();
+      std::string value = pCharacteristic->getValue();
       size_t i = 0;
 
 #ifdef DEBUG
-      Serial.println("Recibido: " + value);
+      Serial.println("Recibido: " + String(value.c_str()));
 #endif
 
       if (value[0] == '~') // Configuration

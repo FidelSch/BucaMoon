@@ -1,10 +1,10 @@
-#include <NeoPixelBus.h>
 
 #include <BLEDevice.h>
 #include <BLEUtils.h>
 #include <BLEServer.h>
 #include "defines.hpp"
 #include "BucaMoon.hpp"
+#include <FastLED.h>
 
 TaskHandle_t Animation;
 
@@ -16,6 +16,7 @@ void setup()
 	Serial.begin(115200);
 	Serial.println("Laburando...");
 #endif
+      FastLED.addLeds<NEOPIXEL, OUTPUT_PIN>(LedBuffer, HOLD_AMOUNT);
 
       gpio_set_direction((gpio_num_t)OUTPUT_PIN, GPIO_MODE_OUTPUT);
 
@@ -28,7 +29,7 @@ void setup()
           &Animation,
           0);
 
-      BLEDevice::init("Fran se la come");
+      BLEDevice::init("Fran no se la come");
 	Server = BLEDevice::createServer();
 	BLEService *Service = Server->createService(SERVICE_UUID);
 	BLECharacteristic *RXCharacteristic = Service->createCharacteristic(CHARACTERISTIC_UUID_RX, BLECharacteristic::PROPERTY_WRITE);
@@ -55,7 +56,7 @@ void loop()
             BLEDevice::startAdvertising();
 
 #ifdef DEBUG
-      Serial.println("Conectados: " + String(Server->getConnectedCount()));
-      vTaskDelay(2000 / portTICK_PERIOD_MS);
+      // Serial.println("Conectados: " + String(Server->getConnectedCount()));
 #endif
+      vTaskDelay(2000 / portTICK_PERIOD_MS);
 }
