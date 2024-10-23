@@ -29,7 +29,7 @@ void setup()
           &AnimationHandle,
           0);
 
-      BLEDevice::init("Fran se la come");
+      BLEDevice::init(BUCAMOON_DEVICE_NAME);
 	Server = BLEDevice::createServer();
 	BLEService *Service = Server->createService(SERVICE_UUID);
 	BLECharacteristic *RXCharacteristic = Service->createCharacteristic(CHARACTERISTIC_UUID_RX, BLECharacteristic::PROPERTY_WRITE);
@@ -52,11 +52,11 @@ void setup()
 
 void loop()
 {
-      if (Server->getConnectedCount() < 3)
+      if (Server->getConnectedCount() < BUCAMOON_MAX_CONNECTIONS)
             BLEDevice::startAdvertising();
 
 #ifdef DEBUG
       Serial.println("Conectados: " + String(Server->getConnectedCount()));
-      vTaskDelay(2000 / portTICK_PERIOD_MS);
 #endif
+      vTaskDelay(2000 / portTICK_PERIOD_MS);
 }
