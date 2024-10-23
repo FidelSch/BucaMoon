@@ -1,10 +1,11 @@
-#include <NeoPixelBus.h>
+#include "defines.hpp"
+#include "BucaMoon.hpp"
+#include "Strip.hpp"
 
+#include <Arduino.h>
 #include <BLEDevice.h>
 #include <BLEUtils.h>
 #include <BLEServer.h>
-#include "defines.hpp"
-#include "BucaMoon.hpp"
 
 TaskHandle_t Animation;
 
