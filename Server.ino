@@ -7,7 +7,7 @@
 #include <BLEUtils.h>
 #include <BLEServer.h>
 
-TaskHandle_t Animation;
+TaskHandle_t AnimationHandle;
 
 static BLEServer *Server;
 
@@ -26,7 +26,7 @@ void setup()
           4096,
           NULL,
           1,
-          &Animation,
+          &AnimationHandle,
           0);
 
       BLEDevice::init("Fran se la come");

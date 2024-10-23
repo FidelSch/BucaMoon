@@ -2,24 +2,28 @@
 #include "Hold.hpp"
 #include <Adafruit_NeoPixel.h>
 
-static Adafruit_NeoPixel strip(HOLD_AMOUNT, OUTPUT_PIN, NEO_RGB | NEO_KHZ400);
+static Adafruit_NeoPixel strip(HOLD_AMOUNT, OUTPUT_PIN, NEO_RGB | NEO_KHZ800);
 
 void initAnimation(void *_null){
       strip.begin();
       // Red, green, blue, off
-      std::array<uint32_t, 4> colors = {0xFF0000, 0x00FF00, 0x0000FF, 0x000000};
+      // uint32_t colors[4] = {0xFF0000, 0x00FF00, 0x0000FF, 0x000000};
+      uint32_t color = 0x00FF0000;
 
-      for (auto colo : colors)
+      while (color)
       {
             for (size_t i = 0; i < HOLD_AMOUNT; i++)
             {
-                  strip.setPixelColor(i, colo);
+                  strip.setPixelColor(i, color);
             }
             vTaskDelay(1000);
             strip.show();
+            color >>= 8;
       }
 
-      // This function should not return
+      vTaskDelete(NULL); // End this task
+
+      // This function should never return
       for(;;) vTaskDelay(5000);
 }
 
