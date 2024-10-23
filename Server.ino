@@ -1,13 +1,13 @@
+#include "defines.hpp"
+#include "BucaMoon.hpp"
+#include "Strip.hpp"
 
 #include <BLEDevice.h>
 #include <BLEUtils.h>
 #include <BLEServer.h>
-#include "defines.hpp"
-#include "BucaMoon.hpp"
 #include <FastLED.h>
-#include "Strip.hpp"
 
-TaskHandle_t Animation;
+TaskHandle_t AnimationHandle;
 
 static BLEServer *Server;
 
@@ -27,10 +27,10 @@ void setup()
           4096,
           NULL,
           1,
-          &Animation,
+          &AnimationHandle,
           0);
 
-      BLEDevice::init("Fran no se la come");
+      BLEDevice::init(BUCAMOON_DEVICE_NAME);
 	Server = BLEDevice::createServer();
 	BLEService *Service = Server->createService(SERVICE_UUID);
 	BLECharacteristic *RXCharacteristic = Service->createCharacteristic(CHARACTERISTIC_UUID_RX, BLECharacteristic::PROPERTY_WRITE);
@@ -53,7 +53,7 @@ void setup()
 
 void loop()
 {
-      if (Server->getConnectedCount() < 3)
+      if (Server->getConnectedCount() < BUCAMOON_MAX_CONNECTIONS)
             BLEDevice::startAdvertising();
 
 #ifdef DEBUG
