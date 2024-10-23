@@ -5,6 +5,7 @@
 #include "defines.hpp"
 #include "BucaMoon.hpp"
 #include <FastLED.h>
+#include "Strip.hpp"
 
 TaskHandle_t Animation;
 
@@ -16,7 +17,7 @@ void setup()
 	Serial.begin(115200);
 	Serial.println("Laburando...");
 #endif
-      FastLED.addLeds<NEOPIXEL, OUTPUT_PIN>(LedBuffer, HOLD_AMOUNT);
+      FastLED.addLeds<WS2811, OUTPUT_PIN, RGB>(LedBuffer, HOLD_AMOUNT);
 
       gpio_set_direction((gpio_num_t)OUTPUT_PIN, GPIO_MODE_OUTPUT);
 
