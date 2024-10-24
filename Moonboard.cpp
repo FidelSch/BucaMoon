@@ -1,12 +1,12 @@
 #include "defines.hpp"
-#include "BucaMoon.hpp"
+#include "Moonboard.hpp"
 #include "Strip.hpp"
 #include "Hold.hpp"
 
 #include <Arduino.h>
 
 
-#ifdef DEBUG
+#ifdef _DEBUG
 
 /// @brief Print detailed board state to serial out based on hold representation
 /// @param holds Hold representation
@@ -128,7 +128,7 @@ void setAdditionalLeds(std::array<uint8_t, HOLD_AMOUNT>& holds)
 }
 
 
-void MoonCallback::onWrite(BLECharacteristic *pCharacteristic)
+void MoonboardCharacteristicCallback::onWrite(BLECharacteristic *pCharacteristic)
 {
       static std::array<uint8_t, HOLD_AMOUNT> holds;
       static bool use_additional_led = false;
@@ -137,13 +137,13 @@ void MoonCallback::onWrite(BLECharacteristic *pCharacteristic)
       std::string value = pCharacteristic->getValue();
       size_t i = 0;
 
-#ifdef DEBUG
+#ifdef _DEBUG
       Serial.println("Recibido: " + String(value.c_str()));
 #endif
 
       if (value[0] == '~') // Configuration
       {
-#ifdef DEBUG
+#ifdef _DEBUG
             Serial.println("Configuration:" + String(value[1]));
 #endif
             switch (value[1])
@@ -177,7 +177,7 @@ void MoonCallback::onWrite(BLECharacteristic *pCharacteristic)
                         setAdditionalLeds(holds);
                   showBoard(holds);
                   use_additional_led = false;
-#ifdef DEBUG
+#ifdef _DEBUG
                   printBoardState(holds);
                   Serial.println(problemString);
                   Serial.print("holds: ");

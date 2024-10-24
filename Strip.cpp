@@ -30,6 +30,8 @@ void runInitAnimation(void)
           "initAnimation", 4096, NULL, 1, &AnimationHandle, 0);
 }
 
+/// @brief Translates hold buffer into board
+/// @param holds Hold buffer
 void showBoard(const std::array<uint8_t, HOLD_AMOUNT> holds)
 {
       strip.begin();
