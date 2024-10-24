@@ -4,10 +4,8 @@
 
 #include <Arduino.h>
 #include <BLEDevice.h>
-#include <BLEUtils.h>
 #include <BLEServer.h>
 
-TaskHandle_t AnimationHandle;
 
 static BLEServer *Server;
 
@@ -18,16 +16,7 @@ void setup()
 	Serial.println("Laburando...");
 #endif
 
-      gpio_set_direction((gpio_num_t)OUTPUT_PIN, GPIO_MODE_OUTPUT);
-
-      xTaskCreatePinnedToCore(
-          initAnimation,
-          "initAnimation",
-          4096,
-          NULL,
-          1,
-          &AnimationHandle,
-          0);
+      runInitAnimation();
 
       BLEDevice::init(BUCAMOON_DEVICE_NAME);
 	Server = BLEDevice::createServer();

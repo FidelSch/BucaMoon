@@ -2,6 +2,6 @@
 #include <Arduino.h>
 #include "defines.hpp"
 
-void initAnimation(void *_null = nullptr);
+void runInitAnimation();
 void showBoard(const std::array<uint8_t, HOLD_AMOUNT> holds);
 

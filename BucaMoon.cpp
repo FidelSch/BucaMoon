@@ -111,15 +111,14 @@ void setAdditionalLeds(std::array<uint8_t, HOLD_AMOUNT>& holds)
           NO_MAPPING, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, // 10
           1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, NO_MAPPING                   // 11
       };
-      uint8_t mapping;
 
       auto additionalLedMapping = [](size_t i)
       {
-            return (i >= 0 && i < _additionalledmapping.size()) ? i + _additionalledmapping[i] : NO_MAPPING;
+            return (i < _additionalledmapping.size()) ? i + _additionalledmapping[i] : NO_MAPPING;
       };
       for (size_t i = 0; i < holds.size(); i++)
       {
-            mapping = additionalLedMapping(i);
+            uint8_t mapping = additionalLedMapping(i);
             if (holds[mapping] != Hold::NO_HOLD || mapping == NO_MAPPING)
                   continue;
 

@@ -10,5 +10,5 @@ void parseProblemString(const String &problemString, std::array<uint8_t, HOLD_AM
 
 class MoonCallback : public BLECharacteristicCallbacks{
 public:
-      void onWrite(BLECharacteristic *pCharacteristic);
+      void onWrite(BLECharacteristic *pCharacteristic) override;
 };
