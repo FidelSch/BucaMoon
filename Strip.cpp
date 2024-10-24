@@ -1,28 +1,33 @@
-#include "defines.hpp"
-#include <Arduino.h>
 #include "Strip.hpp"
 #include "Hold.hpp"
+#include <Adafruit_NeoPixel.h>
 
 CRGB LedBuffer[HOLD_AMOUNT];
 
-/// @brief Show init animation
-void initAnimation(void *_null){
+/// @brief Runs init animation on core 0
+void runInitAnimation(void)
+{
+      TaskHandle_t AnimationHandle;
 
-      // Red, green, blue, off
-      std::array<CRGB, 4> colors = {CRGB::Red, CRGB::Green, CRGB::Blue, CRGB::Black};
+      xTaskCreatePinnedToCore(
+          [](void *)
+          {
+                // Red, green, blue, off
+                std::array<CRGB, 4> colors = {CRGB::Red, CRGB::Green, CRGB::Blue, CRGB::Black};
 
-      for (auto colo : colors)
-      {
-            for (size_t i = 0; i < HOLD_AMOUNT; i++)
-            {
-                  LedBuffer[i] = colo;
-            }
-            vTaskDelay(1000);
-            FastLED.show();
-      }
+                for (auto colo : colors)
+                {
+                      for (size_t i = 0; i < HOLD_AMOUNT; i++)
+                      {
+                            LedBuffer[i] = colo;
+                      }
+                      vTaskDelay(1000);
+                      FastLED.show();
+                }
 
-      // This function should not return
-      for(;;) vTaskDelay(5000);
+                vTaskDelete(NULL); // End this task
+          },
+          "initAnimation", 4096, NULL, 1, &AnimationHandle, 0);
 }
 
 /// @brief "Prints" hold array into LED strip

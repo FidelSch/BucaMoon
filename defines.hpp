@@ -9,13 +9,12 @@
 
 #define HOLD_AMOUNT  200
 #define OUTPUT_PIN   16
-#define BUCAMOON_MAX_CONNECTIONS 5
-#define BUCAMOON_DEVICE_NAME "Moonboard CABA Bucarelli"
-// #define BUCAMOON_DEVICE_NAME "Fran no se la come"
+#define MOONBOARD_MAX_CONNECTIONS 5
+#define MOONBOARD_DEVICE_NAME "Moonboard CABA Bucarelli"
 
 // Status codes
 #define PARSE_OK 0
 #define PARSE_ERROR_OUT_OF_BOUNDS 1
 
 
-#define DEBUG
+// #define _DEBUG
