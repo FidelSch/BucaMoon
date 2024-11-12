@@ -2,6 +2,11 @@
 #include "Hold.hpp"
 #include <Adafruit_NeoPixel.h>
 
+constexpr uint32_t RGB_RED = 0xFF0000;
+constexpr uint32_t RGB_GREEN = 0x00FF00;
+constexpr uint32_t RGB_BLUE = 0x0000FF;
+constexpr uint32_t RGB_BLACK = 0x000000;
+
 static Adafruit_NeoPixel strip(HOLD_AMOUNT, OUTPUT_PIN, NEO_RGB | NEO_KHZ800);
 
 /// @brief Runs init animation on core 0
@@ -12,19 +17,20 @@ void runInitAnimation(void)
       xTaskCreatePinnedToCore(
           [](void *)
           {
-                strip.begin(); // Red, green, blue, off
-                // uint32_t colors[4] = {0xFF0000, 0x00FF00, 0x0000FF, 0x000000};
-                uint32_t color = 0x00FF0000;
+                strip.begin(); 
+                uint32_t color = RGB_RED;
                 while (color)
                 {
                       for (size_t i = 0; i < HOLD_AMOUNT; i++)
                       {
                             strip.setPixelColor(i, color);
                       }
-                      vTaskDelay(1000);
                       strip.show();
+                      vTaskDelay(1000);
                       color >>= 8;
                 }
+                strip.clear();
+                strip.show();
                 vTaskDelete(NULL); // End this task
           },
           "initAnimation", 4096, NULL, 1, &AnimationHandle, 0);
@@ -32,7 +38,7 @@ void runInitAnimation(void)
 
 /// @brief Translates hold buffer into board
 /// @param holds Hold buffer
-void showBoard(const std::array<uint8_t, HOLD_AMOUNT> holds)
+void showBoard(const std::array<Hold::HOLDTYPE_t, HOLD_AMOUNT> holds)
 {
       strip.begin();
 
@@ -41,7 +47,7 @@ void showBoard(const std::array<uint8_t, HOLD_AMOUNT> holds)
             switch (holds[i])
             {
             case Hold::START_HOLD:
-                  strip.setPixelColor(i, 0x00FF00);
+                  strip.setPixelColor(i, RGB_GREEN);
                   break;
             case Hold::RIGHT_HOLD:
             case Hold::LEFT_HOLD:
@@ -49,14 +55,14 @@ void showBoard(const std::array<uint8_t, HOLD_AMOUNT> holds)
             case Hold::PROGRESS_HOLD:
             case Hold::FOOT_HOLD:
             case Hold::ADDITIONAL_LED:
-                  strip.setPixelColor(i, 0x0000FF);
+                  strip.setPixelColor(i, RGB_BLUE);
                   break;
             case Hold::END_HOLD:
-                  strip.setPixelColor(i, 0xFF0000);
+                  strip.setPixelColor(i, RGB_RED);
                   break;
             case Hold::NO_HOLD:
             default:
-                  strip.setPixelColor(i, 0x000000);
+                  strip.setPixelColor(i, RGB_BLACK);
                   break;
             }
       }

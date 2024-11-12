@@ -12,9 +12,5 @@
 #define MOONBOARD_MAX_CONNECTIONS 5
 #define MOONBOARD_DEVICE_NAME "Moonboard CABA Bucarelli"
 
-// Status codes
-#define PARSE_OK 0
-#define PARSE_ERROR_OUT_OF_BOUNDS 1
-
 
 // #define _DEBUG

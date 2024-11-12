@@ -10,7 +10,7 @@
 
 /// @brief Print detailed board state to serial out based on hold representation
 /// @param holds Hold representation
-void printBoardState(const std::array<uint8_t, HOLD_AMOUNT> &holds)
+void printBoardState(const std::array<Hold::HOLDTYPE_t, HOLD_AMOUNT> &holds)
 {
       static const uint8_t ledPrintMapping[HOLD_AMOUNT] = {17, 18, 53, 54, 89, 90, 125, 126, 161, 162, 197,
                                                            16, 19, 52, 55, 88, 91, 124, 127, 160, 163, 196,
@@ -57,17 +57,17 @@ void printBoardState(const std::array<uint8_t, HOLD_AMOUNT> &holds)
 /// @brief Parses input string into output hold representation array
 /// @param problemString Complete problem string
 /// @param outHolds Hold representation output
-void parseProblemString(const String &problemString, std::array<uint8_t, HOLD_AMOUNT> &outHolds)
+void parseProblemString(const String &problemString, std::array<Hold::HOLDTYPE_t, HOLD_AMOUNT> *outHolds)
 {
       String holdDescription = "";
       size_t holdIndex;
-      char holdType;
+      Hold::HOLDTYPE_t holdType;
 
       // Helper function
-      auto parseHold = [](const String &description, size_t *outIndex, char *outHold)
+      auto parseHold = [](const String &description, size_t *outIndex, Hold::HOLDTYPE_t *outHold)
       {
             *outIndex = description.substring(1).toInt();
-            *outHold = description[0];
+            *outHold = (Hold::HOLDTYPE_t)description[0];
 
             if (*outIndex >= HOLD_AMOUNT)
             {
@@ -85,7 +85,7 @@ void parseProblemString(const String &problemString, std::array<uint8_t, HOLD_AM
                   if (parseHold(holdDescription, &holdIndex, &holdType) != PARSE_OK)
                         return;
 
-                  outHolds[holdIndex] = holdType;
+                  (*outHolds)[holdIndex] = holdType;
                   holdDescription.clear();
             }
             else
@@ -95,7 +95,9 @@ void parseProblemString(const String &problemString, std::array<uint8_t, HOLD_AM
       }
 }
 
-void setAdditionalLeds(std::array<uint8_t, HOLD_AMOUNT>& holds)
+/// @brief  Set an additional led for each marked hold, if they have one
+/// @param holds Hold representation array
+void setAdditionalLeds(std::array<Hold::HOLDTYPE_t, HOLD_AMOUNT>& holds)
 {
       constexpr int8_t NO_MAPPING = INT8_MAX;
       static const std::array<int8_t, HOLD_AMOUNT> _additionalledmapping = {
@@ -116,6 +118,7 @@ void setAdditionalLeds(std::array<uint8_t, HOLD_AMOUNT>& holds)
       {
             return (i < _additionalledmapping.size()) ? i + _additionalledmapping[i] : NO_MAPPING;
       };
+
       for (size_t i = 0; i < holds.size(); i++)
       {
             uint8_t mapping = additionalLedMapping(i);
@@ -130,7 +133,7 @@ void setAdditionalLeds(std::array<uint8_t, HOLD_AMOUNT>& holds)
 
 void MoonboardCharacteristicCallback::onWrite(BLECharacteristic *pCharacteristic)
 {
-      static std::array<uint8_t, HOLD_AMOUNT> holds;
+      static std::array<Hold::HOLDTYPE_t, HOLD_AMOUNT> holds;
       static bool use_additional_led = false;
       static String problemString = "";
 
@@ -155,6 +158,8 @@ void MoonboardCharacteristicCallback::onWrite(BLECharacteristic *pCharacteristic
             case 'D': // "Use additional LED"
                   use_additional_led = true;
                   break;
+            case 'B': // "Show move beta"
+                  break;
             }
 
             // Go to start of problem string
@@ -172,7 +177,7 @@ void MoonboardCharacteristicCallback::onWrite(BLECharacteristic *pCharacteristic
       {
             if (value[i] == '#') // Problem end
             {
-                  parseProblemString(problemString, holds);
+                  parseProblemString(problemString, &holds);
                   if (use_additional_led)
                         setAdditionalLeds(holds);
                   showBoard(holds);

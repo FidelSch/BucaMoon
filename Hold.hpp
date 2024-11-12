@@ -2,7 +2,7 @@
 
 namespace Hold
 {
-      enum HOLDTYPE
+      typedef enum
       {
             START_HOLD = 'S',
             PROGRESS_HOLD = 'P',
@@ -13,5 +13,5 @@ namespace Hold
             FOOT_HOLD = 'F',
             ADDITIONAL_LED = 'A',
             NO_HOLD = (char)0
-      };
+      } HOLDTYPE_t;
 };
