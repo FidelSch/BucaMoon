@@ -4,6 +4,6 @@
 #include "defines.hpp"
 #include "Hold.hpp"
 
-void runInitAnimation();
-void showBoard(const std::array<Hold::HOLDTYPE_t, HOLD_AMOUNT> holds);
+void runInitAnimation(void);
+void showBoard(const std::array<Hold::HOLDTYPE_t, HOLD_AMOUNT> holds, const bool showMoveBeta = false);
 

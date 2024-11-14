@@ -97,7 +97,7 @@ void parseProblemString(const String &problemString, std::array<Hold::HOLDTYPE_t
 
 /// @brief  Set an additional led for each marked hold, if they have one
 /// @param holds Hold representation array
-void setAdditionalLeds(std::array<Hold::HOLDTYPE_t, HOLD_AMOUNT>& holds)
+void setAdditionalLeds(std::array<Hold::HOLDTYPE_t, HOLD_AMOUNT> *holds)
 {
       constexpr int8_t NO_MAPPING = INT8_MAX;
       static const std::array<int8_t, HOLD_AMOUNT> _additionalledmapping = {
@@ -119,23 +119,44 @@ void setAdditionalLeds(std::array<Hold::HOLDTYPE_t, HOLD_AMOUNT>& holds)
             return (i < _additionalledmapping.size()) ? i + _additionalledmapping[i] : NO_MAPPING;
       };
 
-      for (size_t i = 0; i < holds.size(); i++)
+      for (size_t i = 0; i <(*holds).size(); i++)
       {
             uint8_t mapping = additionalLedMapping(i);
-            if (holds[mapping] != Hold::NO_HOLD || mapping == NO_MAPPING)
+            if ((*holds)[mapping] != Hold::NO_HOLD || mapping == NO_MAPPING)
                   continue;
 
-            if (holds[i] != Hold::ADDITIONAL_LED && holds[i] != Hold::NO_HOLD)
-                  holds[mapping] = Hold::ADDITIONAL_LED;
+            if ((*holds)[i] != Hold::ADDITIONAL_LED && (*holds)[i] != Hold::NO_HOLD)
+                  (*holds)[mapping] = Hold::ADDITIONAL_LED;
       }
 }
 
+void processProblem(const String &problemString, std::array<Hold::HOLDTYPE_t, HOLD_AMOUNT> &holds, const char configuration)
+{
+      parseProblemString(problemString.c_str(), &holds);
+
+      switch (configuration)
+      {
+      case 'Z': // "Disconnect all clients"
+            // TODO: Handle this
+            // ESP.restart();
+            break;
+      case 'D':
+            setAdditionalLeds(&holds);
+            showBoard(holds, false);
+            break;
+      case 'B': // "Show move beta"
+            showBoard(holds, true);
+            break;
+      default:
+            showBoard(holds, false);
+      }
+}
 
 void MoonboardCharacteristicCallback::onWrite(BLECharacteristic *pCharacteristic)
 {
       static std::array<Hold::HOLDTYPE_t, HOLD_AMOUNT> holds;
-      static bool use_additional_led = false;
-      static String problemString = "";
+      static std::string problemString = "";
+      static char configuration = 0;
 
       std::string value = pCharacteristic->getValue();
       size_t i = 0;
@@ -149,39 +170,25 @@ void MoonboardCharacteristicCallback::onWrite(BLECharacteristic *pCharacteristic
 #ifdef _DEBUG
             Serial.println("Configuration:" + String(value[1]));
 #endif
-            switch (value[1])
-            {
-            case 'Z': // "Disconnect all clients"
-                  // ESP.restart();
-                  break;
-
-            case 'D': // "Use additional LED"
-                  use_additional_led = true;
-                  break;
-            case 'B': // "Show move beta"
-                  break;
-            }
+            configuration = value[1];
 
             // Go to start of problem string
             i = 3;
       }
+      else configuration = 0;
 
       if (i < value.length() && value.length() > 1 && value[i] == 'l' && value[i + 1] == '#') // New problem
       {
             problemString = "";
             holds.fill(Hold::NO_HOLD);
-            showBoard(holds);
+            showBoard(holds, false);
             i+=2;
       }
       while (i < value.length())
       {
             if (value[i] == '#') // Problem end
             {
-                  parseProblemString(problemString, &holds);
-                  if (use_additional_led)
-                        setAdditionalLeds(holds);
-                  showBoard(holds);
-                  use_additional_led = false;
+                  processProblem(problemString.c_str(), holds, configuration);
 #ifdef _DEBUG
                   printBoardState(holds);
                   Serial.println(problemString);

@@ -38,7 +38,7 @@ void runInitAnimation(void)
 
 /// @brief Translates hold buffer into board
 /// @param holds Hold buffer
-void showBoard(const std::array<Hold::HOLDTYPE_t, HOLD_AMOUNT> holds)
+void showBoard(const std::array<Hold::HOLDTYPE_t, HOLD_AMOUNT> holds, const bool showMoveBeta)
 {
       strip.begin();
 
