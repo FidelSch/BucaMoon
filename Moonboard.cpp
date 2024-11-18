@@ -175,13 +175,12 @@ void MoonboardCharacteristicCallback::onWrite(BLECharacteristic *pCharacteristic
             // Go to start of problem string
             i = 3;
       }
-      else configuration = 0;
 
       if (i < value.length() && value.length() > 1 && value[i] == 'l' && value[i + 1] == '#') // New problem
       {
             problemString = "";
             holds.fill(Hold::NO_HOLD);
-            showBoard(holds, false);
+            showBoard();
             i+=2;
       }
       while (i < value.length())
@@ -189,6 +188,8 @@ void MoonboardCharacteristicCallback::onWrite(BLECharacteristic *pCharacteristic
             if (value[i] == '#') // Problem end
             {
                   processProblem(problemString.c_str(), holds, configuration);
+                  // Reset configuration
+                  configuration = 0;
 #ifdef _DEBUG
                   printBoardState(holds);
                   Serial.println(problemString);
