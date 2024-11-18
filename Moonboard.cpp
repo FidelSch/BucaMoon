@@ -123,7 +123,7 @@ void setAdditionalLeds(std::array<Hold::HOLDTYPE_t, HOLD_AMOUNT> *holds)
       for (size_t i = 0; i <(*holds).size(); i++)
       {
             uint8_t mapping = additionalLedMapping(i);
-            if ((*holds)[mapping] != Hold::NO_HOLD || mapping == NO_MAPPING)
+            if (mapping >= HOLD_AMOUNT || (*holds)[mapping] != Hold::NO_HOLD)
                   continue;
 
             if ((*holds)[i] != Hold::ADDITIONAL_LED && (*holds)[i] != Hold::NO_HOLD)
@@ -171,6 +171,13 @@ void MoonboardCharacteristicCallback::onWrite(BLECharacteristic *pCharacteristic
             Serial.println("Configuration:" + String(value[1]));
 #endif
             configuration = value[1];
+
+            // Should this be handled here?
+            if (configuration == 'Z')
+            {
+                  disconnectAllClients();
+                  return;
+            }
 
             // Go to start of problem string
             i = 3;
