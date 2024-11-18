@@ -2,6 +2,7 @@
 #include "Moonboard.hpp"
 #include "Strip.hpp"
 #include "Hold.hpp"
+#include "MoonboardServer.hpp"
 
 #include <Arduino.h>
 
@@ -137,8 +138,7 @@ void processProblem(const String &problemString, std::array<Hold::HOLDTYPE_t, HO
       switch (configuration)
       {
       case 'Z': // "Disconnect all clients"
-            // TODO: Handle this
-            // ESP.restart();
+            disconnectAllClients();
             break;
       case 'D':
             setAdditionalLeds(&holds);
@@ -192,7 +192,7 @@ void MoonboardCharacteristicCallback::onWrite(BLECharacteristic *pCharacteristic
                   configuration = 0;
 #ifdef _DEBUG
                   printBoardState(holds);
-                  Serial.println(problemString);
+                  Serial.println(problemString.c_str());
                   Serial.print("holds: ");
                   for (char c: holds) Serial.print(String((c)?c:'+'));
                   Serial.println();

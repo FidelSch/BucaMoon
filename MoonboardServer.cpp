@@ -1,0 +1,46 @@
+#include "MoonboardServer.hpp"
+#include "defines.hpp"
+#include "Moonboard.hpp"
+
+#include <BLEDevice.h>
+#include <BLEServer.h>
+
+static BLEServer *Server;
+
+void initServer(void)
+{
+      BLEDevice::init(MOONBOARD_DEVICE_NAME);
+	Server = BLEDevice::createServer();
+	BLEService *Service = Server->createService(SERVICE_UUID);
+	BLECharacteristic *RXCharacteristic = Service->createCharacteristic(CHARACTERISTIC_UUID_RX, BLECharacteristic::PROPERTY_WRITE);
+
+	RXCharacteristic->setCallbacks(new MoonboardCharacteristicCallback());
+
+	Service->start();
+
+	BLEAdvertising *pAdvertising = BLEDevice::getAdvertising();
+	pAdvertising->addServiceUUID(SERVICE_UUID);
+	pAdvertising->setScanResponse(true);
+	pAdvertising->setMinPreferred(0x06); // functions that help with iPhone connections issue
+	pAdvertising->setMinPreferred(0x12);
+}
+
+int clientCount(void)
+{
+      return Server->getConnectedCount();
+}
+
+void startAdvertising(void)
+{
+      BLEDevice::startAdvertising();
+}
+
+void disconnectAllClients(void)
+{
+      auto clients = Server->getPeerDevices(true);
+
+      for (auto i: clients)
+      {
+            Server->disconnect(i.first);
+      }
+}
