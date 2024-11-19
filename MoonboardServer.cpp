@@ -9,6 +9,8 @@ static BLEServer *Server;
 
 void initServer(void)
 {
+      ESP_LOGI("Server","Starting BLE Server");
+
       BLEDevice::init(MOONBOARD_DEVICE_NAME);
 	Server = BLEDevice::createServer();
 	BLEService *Service = Server->createService(SERVICE_UUID);
@@ -23,6 +25,8 @@ void initServer(void)
 	pAdvertising->setScanResponse(true);
 	pAdvertising->setMinPreferred(0x06); // functions that help with iPhone connections issue
 	pAdvertising->setMinPreferred(0x12);
+
+      ESP_LOGI("Server","BLE Server started");
 }
 
 int clientCount(void)
@@ -37,6 +41,7 @@ void startAdvertising(void)
 
 void disconnectAllClients(void)
 {
+      ESP_LOGI("disconnectAllClients","Client disconnection called. Proceeding");
       auto clients = Server->getPeerDevices(true);
 
       for (auto i: clients)

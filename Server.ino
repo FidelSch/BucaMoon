@@ -8,26 +8,17 @@
 
 void setup()
 {
-#ifdef _DEBUG
-	Serial.begin(115200);
-	Serial.println("Laburando...");
-#endif
-
       runInitAnimation();
       initServer();
-
-#ifdef _DEBUG
-      Serial.println("Listo!");
-#endif
 }
 
 void loop()
 {
       if (clientCount() < MOONBOARD_MAX_CONNECTIONS)
+      {
+            ESP_LOGD("Server", "%d/%d clients connected. Advertising...");
             startAdvertising();
+      }
 
-#ifdef _DEBUG
-      Serial.println("Conectados: " + String(clientCount()));
-#endif
       vTaskDelay(2000 / portTICK_PERIOD_MS);
 }

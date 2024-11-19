@@ -72,7 +72,7 @@ void parseProblemString(const String &problemString, std::array<Hold::HOLDTYPE_t
 
             if (*outIndex >= HOLD_AMOUNT)
             {
-                  Serial.println("ERROR: Hold Index out of range"); // Buffer overflow protection
+                  ESP_LOGE("parseProblemString", "ERROR: Hold Index out of range"); // Buffer overflow protection
                   return PARSE_ERROR_OUT_OF_BOUNDS;
             }
             return PARSE_OK;
@@ -161,16 +161,12 @@ void MoonboardCharacteristicCallback::onWrite(BLECharacteristic *pCharacteristic
       std::string value = pCharacteristic->getValue();
       size_t i = 0;
 
-#ifdef _DEBUG
-      Serial.println("Recibido: " + String(value.c_str()));
-#endif
+      ESP_LOGD("BLE Write", "Received: " + String(value.c_str()));
 
       if (value[0] == '~') // Configuration
       {
-#ifdef _DEBUG
-            Serial.println("Configuration:" + String(value[1]));
-#endif
             configuration = value[1];
+            ESP_LOGD("BLE Write", "Configuration:" + configuration);
 
             // Should this be handled here?
             if (configuration == 'Z')
@@ -199,11 +195,9 @@ void MoonboardCharacteristicCallback::onWrite(BLECharacteristic *pCharacteristic
                   configuration = 0;
 #ifdef _DEBUG
                   printBoardState(holds);
-                  Serial.println(problemString.c_str());
-                  Serial.print("holds: ");
                   for (char c: holds) Serial.print(String((c)?c:'+'));
-                  Serial.println();
 #endif
+                  ESP_LOGD("Problem string", problemString.c_str());
                   return;
             }
 

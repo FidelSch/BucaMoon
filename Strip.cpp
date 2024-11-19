@@ -15,6 +15,7 @@ static Adafruit_NeoPixel strip(HOLD_AMOUNT, OUTPUT_PIN, NEO_RGB | NEO_KHZ800);
 /// @brief Runs init animation on core 0
 void runInitAnimation(void)
 {
+      ESP_LOGI("Init Animation", "Running animation");
       TaskHandle_t AnimationHandle;
 
       xTaskCreatePinnedToCore(
@@ -44,6 +45,7 @@ void runInitAnimation(void)
 /// @param showMoveBeta 
 void showBoard(const std::array<Hold::HOLDTYPE_t, HOLD_AMOUNT> holds, const bool showMoveBeta)
 {
+      ESP_LOGI("showBoard", "Updating LEDs");
       const uint32_t START_COLOR      = RGB_GREEN;
       const uint32_t RIGHT_COLOR      = RGB_BLUE;
       const uint32_t PROGRESS_COLOR   = RGB_BLUE;
@@ -105,6 +107,7 @@ void showBoard(const std::array<Hold::HOLDTYPE_t, HOLD_AMOUNT> holds, const bool
 
 void showBoard(void)
 {
+      ESP_LOGI("showBoard", "Clearing LEDs");
       strip.clear();
       strip.show();
 }
