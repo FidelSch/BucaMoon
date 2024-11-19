@@ -133,6 +133,7 @@ void setAdditionalLeds(std::array<Hold::HOLDTYPE_t, HOLD_AMOUNT> *holds)
 
 void processProblem(const String &problemString, std::array<Hold::HOLDTYPE_t, HOLD_AMOUNT> &holds, const char configuration)
 {
+      ESP_LOGI("processProblem", "Processing");
       parseProblemString(problemString.c_str(), &holds);
 
       switch (configuration)
@@ -150,6 +151,7 @@ void processProblem(const String &problemString, std::array<Hold::HOLDTYPE_t, HO
       default:
             showBoard(holds, false);
       }
+      ESP_LOGI("processProblem", "Done");
 }
 
 void MoonboardCharacteristicCallback::onWrite(BLECharacteristic *pCharacteristic)
@@ -161,6 +163,7 @@ void MoonboardCharacteristicCallback::onWrite(BLECharacteristic *pCharacteristic
       std::string value = pCharacteristic->getValue();
       size_t i = 0;
 
+      ESP_LOGI("BLE Write", "Receiving data...");
       ESP_LOGD("BLE Write", "Received: " + String(value.c_str()));
 
       if (value[0] == '~') // Configuration
