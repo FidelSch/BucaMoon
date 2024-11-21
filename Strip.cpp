@@ -7,10 +7,18 @@ constexpr uint32_t RGB_GREEN     = 0x00FF00;
 constexpr uint32_t RGB_BLUE      = 0x0000FF;
 constexpr uint32_t RGB_BLACK     = 0x000000;
 constexpr uint32_t RGB_LIGHTBLUE = 0x48C2FF;
-constexpr uint32_t RGB_VIOLET    = 0xAA48FF;
-constexpr uint32_t RGB_PINK      = 0xFF7BAB;
+constexpr uint32_t RGB_PURPLE    = 0x800080;
+constexpr uint32_t RGB_SALMON    = 0xE9967A;
 
 static Adafruit_NeoPixel strip(HOLD_AMOUNT, OUTPUT_PIN, NEO_RGB | NEO_KHZ800);
+static void beginStrip(void){
+      static bool began = false;
+      if (!began)
+      {
+            strip.begin();
+            began = true;
+      }
+}
 
 /// @brief Runs init animation on core 0
 void runInitAnimation(void)
@@ -21,7 +29,7 @@ void runInitAnimation(void)
       xTaskCreatePinnedToCore(
           [](void *)
           {
-                strip.begin(); 
+                beginStrip();
                 uint32_t color = RGB_RED;
                 while (color)
                 {
@@ -60,12 +68,12 @@ void showBoard(const std::array<Hold::HOLDTYPE_t, HOLD_AMOUNT> holds, const bool
 
       if (showMoveBeta)
       {
-            LEFT_COLOR = RGB_VIOLET;
+            LEFT_COLOR = RGB_PURPLE;
             FOOT_COLOR = RGB_LIGHTBLUE;
-            MATCH_COLOR = RGB_PINK;
+            MATCH_COLOR = RGB_SALMON;
       }
 
-      strip.begin();
+      beginStrip();
 
       for (size_t i = 0; i < HOLD_AMOUNT; i++)
       {
