@@ -8,6 +8,7 @@
 
 void setup()
 {
+      showBoard();
       runInitAnimation();
       initServer();
 }
