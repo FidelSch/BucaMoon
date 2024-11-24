@@ -1,0 +1,8 @@
+{
+      "files.associations": {
+            "*.dump": "sql",
+            "*.tcc": "cpp",
+            "algorithm": "cpp",
+            "array": "cpp"
+      }
+}
