@@ -10,16 +10,16 @@ void setup()
 {
       showBoard();
       runInitAnimation();
-      initServer();
+      MoonboardServer::init();
 }
 
 void loop()
 {
-      if (clientCount() < MOONBOARD_MAX_CONNECTIONS)
+      if (MoonboardServer::clientCount() < MOONBOARD_MAX_CONNECTIONS)
       {
-            ESP_LOGD("Server", "%d/%d clients connected. Advertising...");
-            startAdvertising();
+            ESP_LOGD("Server", "%d/%d clients connected. Advertising...", MoonboardServer::clientCount(), MOONBOARD_MAX_CONNECTIONS);
+            MoonboardServer::startAdvertising();
       }
 
-      vTaskDelay(2000 / portTICK_PERIOD_MS);
+      vTaskDelay(5000 / portTICK_PERIOD_MS);
 }

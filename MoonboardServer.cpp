@@ -4,10 +4,11 @@
 
 #include <BLEDevice.h>
 #include <BLEServer.h>
+#include <Arduino.h>
 
 static BLEServer *Server;
 
-void initServer(void)
+void MoonboardServer::init(void)
 {
       ESP_LOGI("Server","Starting BLE Server");
 
@@ -29,17 +30,17 @@ void initServer(void)
       ESP_LOGI("Server","BLE Server started");
 }
 
-int clientCount(void)
+int MoonboardServer::clientCount(void)
 {
       return Server->getConnectedCount();
 }
 
-void startAdvertising(void)
+void MoonboardServer::startAdvertising(void)
 {
       BLEDevice::startAdvertising();
 }
 
-void disconnectAllClients(void)
+void MoonboardServer::disconnectAllClients(void)
 {
       ESP_LOGI("disconnectAllClients","Client disconnection called. Proceeding");
       auto clients = Server->getPeerDevices(true);

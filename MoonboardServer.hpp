@@ -1,5 +1,9 @@
+#pragma once
 
-void initServer(void);
-int clientCount(void);
-void startAdvertising(void);
-void disconnectAllClients(void);
+namespace MoonboardServer
+{
+      void init(void);
+      int clientCount(void);
+      void startAdvertising(void);
+      void disconnectAllClients(void);
+}

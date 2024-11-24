@@ -12,5 +12,3 @@
 #define MOONBOARD_MAX_CONNECTIONS 5
 #define MOONBOARD_DEVICE_NAME "Moonboard CABA Bucarelli"
 
-
-// #define _DEBUG

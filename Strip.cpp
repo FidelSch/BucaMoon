@@ -8,7 +8,7 @@ constexpr uint32_t RGB_BLUE      = 0x0000FF;
 constexpr uint32_t RGB_BLACK     = 0x000000;
 constexpr uint32_t RGB_LIGHTBLUE = 0x48C2FF;
 constexpr uint32_t RGB_PURPLE    = 0x800080;
-constexpr uint32_t RGB_SALMON    = 0xE9967A;
+constexpr uint32_t RGB_SALMON    = 0xFF5A2C;
 
 static NeoPixelBus<NeoRgbFeature, NeoWs2811Method> strip(HOLD_AMOUNT, OUTPUT_PIN);
 static void beginStrip(void){
@@ -33,10 +33,8 @@ void runInitAnimation(void)
                 uint32_t color = RGB_RED;
                 while (color)
                 {
-                      for (size_t i = 0; i < HOLD_AMOUNT; i++)
-                      {
-                            strip.SetPixelColor(i, color);
-                      }
+                      ESP_LOGD("Init Animation", "Showing %d", color);
+                      strip.ClearTo(HtmlColor(color));
                       strip.Show();
                       vTaskDelay(1000);
                       color >>= 8;
@@ -115,7 +113,10 @@ void showBoard(const std::array<Hold::HOLDTYPE_t, HOLD_AMOUNT> holds, const bool
 
 void showBoard(void)
 {
+      beginStrip();
       ESP_LOGI("showBoard", "Clearing LEDs");
-      strip.ClearTo(RGB_BLACK);
+      strip.ClearTo(HtmlColor(RGB_BLACK));
+      ESP_LOGV("showBoard", "Showing...");
       strip.Show();
+      ESP_LOGV("showBoard", "Cleared");
 }
