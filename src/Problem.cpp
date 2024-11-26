@@ -28,17 +28,17 @@ Problem::Problem(std::string problemString)
       m_problemString = problemString;
       size_t problem_start_pos = 2; // After "l#" (problem start)
 
-      if (problemString.length() < 3) // Invalid
-      {
-            ESP_LOGE("Problem", "Invalid: Empty problem string!");
-            return;
-      }
-
-      if (problemString[0] == '~') // Has configuration
+      if (problemString.length() >= 2 && problemString[0] == '~') // Has configuration
       {
             m_configuration = problemString[1];
+
+            // After "~C*l#", where C is the configuration char
             problem_start_pos = 5;
       }
+
+      // String may not contain a problem. If that is the case there is no point in continuing
+      if (problemString.length() <= problem_start_pos)
+            return;
 
       parseProblemString(problemString.substr(problem_start_pos), &m_holds);
       ESP_LOGV("Problem constructor", "%s", m_problemString.c_str());
