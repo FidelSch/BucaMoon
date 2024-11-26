@@ -14,11 +14,6 @@ void setup()
 
 void loop()
 {
-      if (MoonboardServer::clientCount() < MOONBOARD_MAX_CONNECTIONS)
-      {
-            ESP_LOGD("Server", "%d/%d clients connected. Advertising...", MoonboardServer::clientCount(), MOONBOARD_MAX_CONNECTIONS);
-            MoonboardServer::startAdvertising();
-      }
-
+      // Nothing to do
       vTaskDelay(5000 / portTICK_PERIOD_MS);
 }

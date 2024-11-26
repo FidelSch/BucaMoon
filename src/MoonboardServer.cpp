@@ -18,6 +18,7 @@ void MoonboardServer::init(void)
 	BLECharacteristic *RXCharacteristic = Service->createCharacteristic(CHARACTERISTIC_UUID_RX, BLECharacteristic::PROPERTY_WRITE);
 
 	RXCharacteristic->setCallbacks(new MoonboardCharacteristicCallback());
+      Server->setCallbacks(new MoonboardServerCallback());
 
 	Service->start();
 
@@ -27,6 +28,7 @@ void MoonboardServer::init(void)
 	pAdvertising->setMinPreferred(0x06); // functions that help with iPhone connections issue
 	pAdvertising->setMinPreferred(0x12);
 
+      Server->startAdvertising();
       ESP_LOGI("Server","BLE Server started");
 }
 

@@ -1,4 +1,6 @@
 #include "MoonboardCallbacks.hpp"
+#include "Strip.hpp"
+#include "defines.hpp"
 
 #include <Arduino.h>
 
@@ -35,4 +37,27 @@ void MoonboardCharacteristicCallback::onWrite(BLECharacteristic *pCharacteristic
 
             m_problemString += value[i];
       }
+}
+
+void MoonboardServerCallback::onConnect(BLEServer *pServer)
+{
+      if (pServer->getConnectedCount() < MOONBOARD_MAX_CONNECTIONS)
+      {
+            ESP_LOGD("Server", "%d/%d clients connected. Advertising...", pServer->getConnectedCount(), MOONBOARD_MAX_CONNECTIONS);
+            pServer->startAdvertising();
+      }
+}
+
+void MoonboardServerCallback::onDisconnect(BLEServer *pServer, esp_ble_gatts_cb_param_t *param)
+{
+      // Is this the last active connection?
+      if (pServer->getConnectedCount() != 1)
+            return;
+
+      // Was this called by that last connection?
+      if (param->disconnect.conn_id != (*(pServer->getPeerDevices(true).begin())).first)
+            return;
+
+      // If both, clear board
+      showBoard();
 }
