@@ -1,6 +1,6 @@
 #include "MoonboardServer.hpp"
 #include "defines.hpp"
-#include "Moonboard.hpp"
+#include "MoonboardCallbacks.hpp"
 
 #include <BLEDevice.h>
 #include <BLEServer.h>

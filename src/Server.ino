@@ -1,5 +1,4 @@
 #include "defines.hpp"
-#include "Moonboard.hpp"
 #include "Strip.hpp"
 #include "MoonboardServer.hpp"
 

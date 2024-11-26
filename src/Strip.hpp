@@ -1,5 +1,4 @@
 #pragma once
-#include <Arduino.h>
 #include <array>
 #include "defines.hpp"
 #include "Hold.hpp"
