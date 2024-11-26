@@ -1,34 +1,38 @@
-#include "Moonboard.hpp"
-#include "Problem.hpp"
+#include "MoonboardCallbacks.hpp"
 
 #include <Arduino.h>
 
+MoonboardCharacteristicCallback::MoonboardCharacteristicCallback()
+{
+      m_problemString.reserve(75); // Theoretical max for problem string
+}
+
 void MoonboardCharacteristicCallback::onWrite(BLECharacteristic *pCharacteristic)
 {
-      static Problem problem;
-      static std::string problemString = "";
-
-      std::string value = pCharacteristic->getValue();
-      size_t i = 0;
+      const std::string value = pCharacteristic->getValue();
 
       ESP_LOGI("BLE Write", "Receiving data...");
       ESP_LOGD("BLE Write", "Received: %s", value.c_str());
 
-      while (i < value.length())
+      if (value.length() == 0)
+            return;
+
+      if ('~' == value[0] || 'l' == value[0]) // Problem start
+            m_problemString = "";
+
+      for (size_t i = 0; i < value.length(); i++)
       {
             if (i == value.length() - 1 && (value[i] == '#' || value[i] == '*')) // Problem end
             {
-                  problem = Problem(problemString);
-                  problem.process();
-                  problemString = "";
+                  m_problem = Problem(m_problemString);
+                  m_problem.process();
 
 #if ARDUHAL_LOG_LEVEL >= ARDUHAL_LOG_LEVEL_DEBUG
-                  problem.printBoardState();
+                  m_problem.printBoardState();
 #endif
                   return;
             }
 
-            problemString += value[i];
-            i++;
+            m_problemString += value[i];
       }
 }
