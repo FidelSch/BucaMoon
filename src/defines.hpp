@@ -9,6 +9,6 @@
 
 #define HOLD_AMOUNT  200
 #define OUTPUT_PIN   16
-#define MOONBOARD_MAX_CONNECTIONS 5
+#define MOONBOARD_MAX_CONNECTIONS 10
 #define MOONBOARD_DEVICE_NAME "Moonboard CABA Bucarelli"
 

@@ -1,5 +1,6 @@
 #pragma once
 #include <array>
+#include <string>
 #include "Hold.hpp"
 #include "defines.hpp"
 
