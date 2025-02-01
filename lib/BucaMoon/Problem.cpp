@@ -35,8 +35,10 @@ Problem::Problem(std::string problemString)
             // After "~C*l#", where C is the configuration char
             problem_start_pos = 5;
       }
+      else 
+            m_configuration = 0;
 
-      // String may not contain a problem. If that is the case there is no point in continuing
+      // String may not actually contain a problem 
       if (problemString.length() <= problem_start_pos)
             return;
 
@@ -73,7 +75,14 @@ void Problem::process(void)
 void Problem::parseProblemString(const std::string &problemString, std::array<Hold::HOLDTYPE_t, HOLD_AMOUNT> *outHolds)
 {
       ESP_LOGD("parseProblemString", "Parsing %s", problemString.c_str());
+
+      if (problemString.empty())
+      {
+            outHolds->fill(Hold::NO_HOLD);
+            return;
+      } 
       std::string holdDescription = "";
+      holdDescription.reserve(4); // Up to 3 digits + description character
       size_t holdIndex;
       Hold::HOLDTYPE_t holdType;
 
@@ -145,6 +154,16 @@ void Problem::setAdditionalLeds()
             if (m_holds[i] != Hold::ADDITIONAL_LED && m_holds[i] != Hold::NO_HOLD)
                   m_holds[mapping] = Hold::ADDITIONAL_LED;
       }
+}
+
+std::array<Hold::HOLDTYPE_t, HOLD_AMOUNT> Problem::getHolds()
+{
+      return m_holds;
+}
+
+char Problem::getConfiguration()
+{
+      return m_configuration;
 }
 
 /// @brief Print detailed board state to serial out based on hold representation

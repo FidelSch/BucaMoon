@@ -19,6 +19,9 @@ public:
 
       static void parseProblemString(const std::string &problemString, std::array<Hold::HOLDTYPE_t, HOLD_AMOUNT> *outHolds);
 
+      std::array<Hold::HOLDTYPE_t, HOLD_AMOUNT> getHolds();
+      char getConfiguration();
+
       void process(void);
       void printBoardState();
 };
