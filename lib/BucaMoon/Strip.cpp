@@ -23,14 +23,15 @@ static void beginStrip(void){
 /// @brief Runs init animation on core 0
 void runInitAnimation(void)
 {
-      ESP_LOGI("Init Animation", "Running animation");
+      ESP_LOGI("initAnimation", "Running animation");
       TaskHandle_t AnimationHandle;
 
+      beginStrip();
       xTaskCreatePinnedToCore(
           [](void *)
           {
                 beginStrip();
-                uint32_t color = RGB_RED;
+                uint32_t color = 0x880000;
                 while (color)
                 {
                       ESP_LOGD("Init Animation", "Showing %d", color);
