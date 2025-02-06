@@ -87,13 +87,20 @@ void Problem::parseProblemString(const std::string &problemString, std::array<Ho
       Hold::HOLDTYPE_t holdType;
 
       constexpr int8_t PARSE_ERROR_OUT_OF_BOUNDS = -1;
+      constexpr int8_t PARSE_ERROR_INVALID_INDEX = -2;
       constexpr int8_t PARSE_OK = 0;
 
       // Helper function
       auto parseHold = [](const std::string &description, size_t *outIndex, Hold::HOLDTYPE_t *outHold)
       {
-            *outIndex = stoi(description.substr(1));
-            *outHold = (Hold::HOLDTYPE_t)description[0];
+            try {
+                  *outIndex = stoi(description.substr(1));
+            } catch (const std::invalid_argument &e) {
+                  ESP_LOGE("parseProblemString", "ERROR: Hold Index is not a number! Got %s", description.c_str());
+                  return PARSE_ERROR_INVALID_INDEX;
+            }
+
+            *outHold = static_cast<Hold::HOLDTYPE_t>(description[0]);
 
             if (*outIndex >= HOLD_AMOUNT || *outIndex < 0)
             {
