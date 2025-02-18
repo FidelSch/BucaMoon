@@ -15,13 +15,13 @@ class Problem
 public:
       Problem(void);
       Problem(const std::array<Hold::HOLDTYPE_t, HOLD_AMOUNT> &holds, const char configuration);
-      Problem(std::string problemString);
+      Problem(const std::string &problemString);
 
       static void parseProblemString(const std::string &problemString, std::array<Hold::HOLDTYPE_t, HOLD_AMOUNT> *outHolds);
 
-      std::array<Hold::HOLDTYPE_t, HOLD_AMOUNT> getHolds();
-      char getConfiguration();
+      std::array<Hold::HOLDTYPE_t, HOLD_AMOUNT> getHolds() const;
+      char getConfiguration() const;
 
       void process(void);
-      void printBoardState();
+      void printBoardState() const;
 };

@@ -6,26 +6,26 @@
 
 #include <Arduino.h>
 
-Problem::Problem(void)
+Problem::Problem(void) :
+      m_configuration(0),
+      m_problemString("")
 {
       m_holds = std::array<Hold::HOLDTYPE_t, HOLD_AMOUNT>();
       m_holds.fill(Hold::NO_HOLD);
-      m_configuration = 0;
-      m_problemString = "";
 }
 
-Problem::Problem(const std::array<Hold::HOLDTYPE_t, HOLD_AMOUNT> &holds, const char configuration)
+Problem::Problem(const std::array<Hold::HOLDTYPE_t, HOLD_AMOUNT> &holds, const char configuration):
+      m_configuration(configuration),
+      m_problemString(""),
+      m_holds(holds)
 {
-      m_holds = holds;
-      m_configuration = configuration;
-      m_problemString = "";
 }
 
-Problem::Problem(std::string problemString)
+Problem::Problem(const std::string& problemString):
+      m_problemString(problemString)
 {
       m_holds = std::array<Hold::HOLDTYPE_t, HOLD_AMOUNT>();
       m_holds.fill(Hold::NO_HOLD);
-      m_problemString = problemString;
       size_t problem_start_pos = 2; // After "l#" (problem start)
 
       if (problemString.length() >= 2 && problemString[0] == '~') // Has configuration
@@ -55,13 +55,12 @@ void Problem::process(void)
       case 'Z': // "Disconnect all clients"
             MoonboardServer::disconnectAllClients();
             break;
-      case 'D': // "Use additional LED"
-            setAdditionalLeds();
-            stripController.showBoard(m_holds, false);
-            break;
       case 'B': // "Show move beta"
             stripController.showBoard(m_holds, true);
             break;
+      case 'D': // "Use additional LED"
+            setAdditionalLeds();
+            // Intentional no-break
       default:
             stripController.showBoard(m_holds, false);
       }
@@ -133,7 +132,7 @@ void Problem::parseProblemString(const std::string &problemString, std::array<Ho
 void Problem::setAdditionalLeds()
 {
       constexpr int8_t NO_MAPPING = INT8_MAX;
-      static const std::array<int8_t, HOLD_AMOUNT> _additionalledmapping = {
+      static const std::array<int8_t, HOLD_AMOUNT> ADDITIONAL_LED_MAPPING = {
           1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, NO_MAPPING,                  // 1
           NO_MAPPING, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, // 2
           1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, NO_MAPPING,                  // 3
@@ -147,35 +146,39 @@ void Problem::setAdditionalLeds()
           1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, NO_MAPPING                   // 11
       };
 
-      auto additionalLedMapping = [](size_t i)
+      auto additionalLedMapping = [](const size_t i)
       {
-            return (i < _additionalledmapping.size()) ? i + _additionalledmapping[i] : NO_MAPPING;
+            return (i < ADDITIONAL_LED_MAPPING.size()) ? i + ADDITIONAL_LED_MAPPING[i] : NO_MAPPING;
       };
 
       for (size_t i = 0; i < m_holds.size(); i++)
       {
-            uint8_t mapping = additionalLedMapping(i);
-            if (mapping >= HOLD_AMOUNT || m_holds[mapping] != Hold::NO_HOLD)
+            if (m_holds[i] == Hold::ADDITIONAL_LED || m_holds[i] == Hold::NO_HOLD) {
                   continue;
+            }
 
-            if (m_holds[i] != Hold::ADDITIONAL_LED && m_holds[i] != Hold::NO_HOLD)
-                  m_holds[mapping] = Hold::ADDITIONAL_LED;
+            size_t mappedIndex = additionalLedMapping(i);
+            if (mappedIndex >= HOLD_AMOUNT || m_holds[mappedIndex] != Hold::NO_HOLD) {
+                  continue;
+            }
+
+            m_holds[mappedIndex] = Hold::ADDITIONAL_LED;
       }
 }
 
-std::array<Hold::HOLDTYPE_t, HOLD_AMOUNT> Problem::getHolds()
+std::array<Hold::HOLDTYPE_t, HOLD_AMOUNT> Problem::getHolds() const
 {
       return m_holds;
 }
 
-char Problem::getConfiguration()
+char Problem::getConfiguration() const
 {
       return m_configuration;
 }
 
 /// @brief Print detailed board state to serial out based on hold representation
 /// @param holds Hold representation
-void Problem::printBoardState()
+void Problem::printBoardState() const
 {
       static const uint8_t ledPrintMapping[HOLD_AMOUNT] = {17, 18, 53, 54, 89, 90, 125, 126, 161, 162, 197,
                                                            16, 19, 52, 55, 88, 91, 124, 127, 160, 163, 196,
