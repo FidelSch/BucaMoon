@@ -8,7 +8,7 @@ StripController stripController(HOLD_AMOUNT, OUTPUT_PIN);
 void setup()
 {
       stripController.showBoard();
-      stripController.runInitAnimation();
+      // stripController.runInitAnimation();
       MoonboardServer::init();
 }
 

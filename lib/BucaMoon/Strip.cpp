@@ -19,6 +19,8 @@ StripController::StripController(const uint16_t holdAmount, const uint8_t output
 }
 
 /// @brief Runs init animation on core 0
+/// @warning May strain power supply, use with caution
+/// Consider avoiding if you experience crashes
 void StripController::runInitAnimation(void)
 {
       ESP_LOGI("initAnimation", "Running animation");
@@ -41,7 +43,12 @@ void StripController::runInitAnimation(void)
                 strip->Show();
                 vTaskDelete(NULL); // End this task
           },
-          "initAnimation", 4096, this, 1, &AnimationHandle, 0);
+          "initAnimation", 
+          4096, 
+          &(this->m_strip), 
+          1, 
+          &AnimationHandle, 
+          0);
 }
 
 /// @brief Translates hold buffer into board
