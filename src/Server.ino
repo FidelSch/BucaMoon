@@ -4,11 +4,11 @@
 
 #include <Arduino.h>
 
-
+StripController stripController(HOLD_AMOUNT, OUTPUT_PIN);
 void setup()
 {
-      showBoard();
-      runInitAnimation();
+      stripController.showBoard();
+      stripController.runInitAnimation();
       MoonboardServer::init();
 }
 

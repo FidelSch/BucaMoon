@@ -59,5 +59,5 @@ void MoonboardServerCallback::onDisconnect(BLEServer *pServer, esp_ble_gatts_cb_
             return;
 
       // If both, clear board
-      showBoard();
+      stripController.showBoard();
 }

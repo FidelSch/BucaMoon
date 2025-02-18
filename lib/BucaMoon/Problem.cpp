@@ -57,13 +57,13 @@ void Problem::process(void)
             break;
       case 'D': // "Use additional LED"
             setAdditionalLeds();
-            showBoard(m_holds, false);
+            stripController.showBoard(m_holds, false);
             break;
       case 'B': // "Show move beta"
-            showBoard(m_holds, true);
+            stripController.showBoard(m_holds, true);
             break;
       default:
-            showBoard(m_holds, false);
+            stripController.showBoard(m_holds, false);
       }
       ESP_LOGI("processProblem", "Done");
 }
