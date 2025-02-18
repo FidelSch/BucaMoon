@@ -9,7 +9,7 @@ class StripController {
 public:
       StripController(const uint16_t holdAmount, const uint8_t outputPin);
       void runInitAnimation(void);
-      void showBoard(const std::array<Hold::HOLDTYPE_t, HOLD_AMOUNT> holds, const bool showMoveBeta = false);
+      void showBoard(const std::array<Hold::HOLDTYPE_t, HOLD_AMOUNT> &holds, const bool showMoveBeta = false);
       void showBoard(void);
 }; 
 

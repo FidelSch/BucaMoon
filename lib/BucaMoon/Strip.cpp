@@ -54,7 +54,7 @@ void StripController::runInitAnimation(void)
 /// @brief Translates hold buffer into board
 /// @param holds Hold buffer
 /// @param showMoveBeta Show beta colors
-void StripController::showBoard(const std::array<Hold::HOLDTYPE_t, HOLD_AMOUNT> holds, const bool showMoveBeta)
+void StripController::showBoard(const std::array<Hold::HOLDTYPE_t, HOLD_AMOUNT> &holds, const bool showMoveBeta)
 {
       ESP_LOGI("showBoard", "Updating LEDs");
       static const uint32_t START_COLOR      = RGB_GREEN;
